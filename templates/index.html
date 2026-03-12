@@ -1,0 +1,333 @@
+{% extends "base.html" %}
+{% block title %}Найдите работу мечты{% endblock %}
+
+{% block content %}
+
+<!-- HERO SECTION -->
+<section class="hero">
+    <div class="container">
+        <div class="hero-content">
+            <div class="hero-badge">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                Платформа №1 в Туркменистане
+            </div>
+            <h1 class="hero-title">Найдите работу<br>своей мечты</h1>
+            <p class="hero-subtitle">Тысячи вакансий от ведущих компаний Туркменистана. Ваша карьера начинается здесь.</p>
+
+            <!-- Search Box -->
+            <div class="hero-search">
+                <div class="search-box">
+                    <div class="search-field search-field-main">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="search-icon">
+                            <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+                        </svg>
+                        <input type="text" class="search-input" id="heroSearchInput" placeholder="Должность, ключевое слово...">
+                    </div>
+                    <div class="search-field search-field-city">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="search-icon">
+                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>
+                        </svg>
+                        <select class="search-select" id="heroSearchCity">
+                            <option value="">Все города</option>
+                            <option value="Ашхабад">Ашхабад</option>
+                            <option value="Туркменабат">Туркменабат</option>
+                            <option value="Дашогуз">Дашогуз</option>
+                            <option value="Мары">Мары</option>
+                            <option value="Балканабат">Балканабат</option>
+                            <option value="Туркменбаши">Туркменбаши</option>
+                        </select>
+                    </div>
+                    <button class="btn btn-primary btn-search" id="heroSearchBtn">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+                        Найти работу
+                    </button>
+                </div>
+                <div class="hero-search-tags">
+                    <span class="tag-label">Популярное:</span>
+                    <button class="search-tag" data-query="программист">Программист</button>
+                    <button class="search-tag" data-query="бухгалтер">Бухгалтер</button>
+                    <button class="search-tag" data-query="инженер">Инженер</button>
+                    <button class="search-tag" data-query="менеджер">Менеджер</button>
+                    <button class="search-tag" data-query="врач">Врач</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="hero-stats" id="heroStats">
+            <div class="hero-stat">
+                <span class="hero-stat-num" id="statJobs">—</span>
+                <span class="hero-stat-label">Вакансий</span>
+            </div>
+            <div class="hero-stat-divider"></div>
+            <div class="hero-stat">
+                <span class="hero-stat-num" id="statCompanies">—</span>
+                <span class="hero-stat-label">Компаний</span>
+            </div>
+            <div class="hero-stat-divider"></div>
+            <div class="hero-stat">
+                <span class="hero-stat-num" id="statResumes">—</span>
+                <span class="hero-stat-label">Резюме</span>
+            </div>
+            <div class="hero-stat-divider"></div>
+            <div class="hero-stat">
+                <span class="hero-stat-num" id="statUsers">—</span>
+                <span class="hero-stat-label">Соискателей</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CATEGORIES SECTION -->
+<section class="section">
+    <div class="container">
+        <div class="section-header">
+            <h2 class="section-title">Категории профессий</h2>
+            <a href="/jobs" class="section-link">Все вакансии →</a>
+        </div>
+        <div class="categories-grid" id="categoriesGrid">
+            <div class="categories-skeleton">
+                <div class="skeleton-card"></div>
+                <div class="skeleton-card"></div>
+                <div class="skeleton-card"></div>
+                <div class="skeleton-card"></div>
+                <div class="skeleton-card"></div>
+                <div class="skeleton-card"></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- FEATURED JOBS SECTION -->
+<section class="section section-alt">
+    <div class="container">
+        <div class="section-header">
+            <h2 class="section-title">Горячие вакансии</h2>
+            <a href="/jobs?is_hot=true" class="section-link">Смотреть все →</a>
+        </div>
+        <div class="jobs-grid" id="featuredJobsGrid">
+            <div class="loading-state">
+                <div class="spinner"></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- LATEST JOBS SECTION -->
+<section class="section">
+    <div class="container">
+        <div class="section-header">
+            <h2 class="section-title">Новые вакансии</h2>
+            <a href="/jobs" class="section-link">Все вакансии →</a>
+        </div>
+        <div class="jobs-list" id="latestJobsList">
+            <div class="loading-state">
+                <div class="spinner"></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- COMPANIES SECTION -->
+<section class="section section-alt">
+    <div class="container">
+        <div class="section-header">
+            <h2 class="section-title">Ведущие компании</h2>
+            <a href="/companies" class="section-link">Все компании →</a>
+        </div>
+        <div class="companies-grid" id="companiesGrid">
+            <div class="loading-state">
+                <div class="spinner"></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CITIES SECTION -->
+<section class="section">
+    <div class="container">
+        <div class="section-header">
+            <h2 class="section-title">Вакансии по городам</h2>
+        </div>
+        <div class="cities-grid" id="citiesGrid">
+            <div class="loading-state"><div class="spinner"></div></div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA SECTION -->
+<section class="section cta-section">
+    <div class="container">
+        <div class="cta-block">
+            <div class="cta-content">
+                <h2 class="cta-title">Готовы начать?</h2>
+                <p class="cta-text">Зарегистрируйтесь бесплатно и откройте доступ к тысячам вакансий</p>
+            </div>
+            <div class="cta-actions" id="ctaActions">
+                <a href="/register" class="btn btn-white btn-lg">Найти работу</a>
+                <a href="/register?role=employer" class="btn btn-outline-white btn-lg">Найти сотрудника</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/search.js') }}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    loadIndexPage();
+});
+
+async function loadIndexPage() {
+    await Promise.all([
+        loadStats(),
+        loadCategories(),
+        loadFeaturedJobs(),
+        loadLatestJobs(),
+        loadTopCompanies(),
+        loadCitiesStats(),
+    ]);
+}
+
+async function loadStats() {
+    try {
+        const data = await API.get('/api/jobs/stats/overview');
+        document.getElementById('statJobs').textContent = formatNumber(data.total_jobs);
+        document.getElementById('statCompanies').textContent = formatNumber(data.total_companies);
+        document.getElementById('statResumes').textContent = formatNumber(data.total_resumes);
+        document.getElementById('statUsers').textContent = formatNumber(data.total_users);
+    } catch(e) {}
+}
+
+async function loadCategories() {
+    try {
+        const data = await API.get('/api/companies/categories');
+        const grid = document.getElementById('categoriesGrid');
+
+        if (!data.categories || data.categories.length === 0) {
+            grid.innerHTML = '<p class="empty-text">Категории не найдены</p>';
+            return;
+        }
+
+        const categoryIcons = {
+            'it': `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>`,
+            'finance': `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>`,
+            'construction': `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>`,
+            'medicine': `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>`,
+            'education': `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>`,
+            'marketing': `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>`,
+            'law': `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>`,
+            'industry': `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>`,
+            'transport': `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>`,
+            'sales': `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>`,
+            'oil': `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>`,
+            'government': `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>`,
+        };
+
+        grid.innerHTML = data.categories.map(cat => `
+            <a href="/jobs?category_id=${cat.id}" class="category-card">
+                <div class="category-icon">${categoryIcons[cat.icon] || categoryIcons['it']}</div>
+                <div class="category-info">
+                    <span class="category-name">${cat.name}</span>
+                    <span class="category-count">${cat.jobs_count} ${pluralize(cat.jobs_count, 'вакансия', 'вакансии', 'вакансий')}</span>
+                </div>
+                <svg class="category-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+            </a>
+        `).join('');
+    } catch(e) {
+        document.getElementById('categoriesGrid').innerHTML = '';
+    }
+}
+
+async function loadFeaturedJobs() {
+    try {
+        const data = await API.get('/api/jobs?is_hot=true&per_page=6');
+        const grid = document.getElementById('featuredJobsGrid');
+
+        if (!data.jobs || data.jobs.length === 0) {
+            grid.innerHTML = '<p class="empty-text">Горячих вакансий пока нет</p>';
+            return;
+        }
+
+        grid.innerHTML = data.jobs.map(job => renderJobCard(job)).join('');
+    } catch(e) {
+        document.getElementById('featuredJobsGrid').innerHTML = '';
+    }
+}
+
+async function loadLatestJobs() {
+    try {
+        const data = await API.get('/api/jobs?per_page=8&sort=date');
+        const list = document.getElementById('latestJobsList');
+
+        if (!data.jobs || data.jobs.length === 0) {
+            list.innerHTML = '<p class="empty-text">Вакансий пока нет</p>';
+            return;
+        }
+
+        list.innerHTML = data.jobs.map(job => renderJobListItem(job)).join('');
+    } catch(e) {
+        document.getElementById('latestJobsList').innerHTML = '';
+    }
+}
+
+async function loadTopCompanies() {
+    try {
+        const data = await API.get('/api/companies?per_page=8&sort=jobs');
+        const grid = document.getElementById('companiesGrid');
+
+        if (!data.companies || data.companies.length === 0) {
+            grid.innerHTML = '<p class="empty-text">Компании не найдены</p>';
+            return;
+        }
+
+        grid.innerHTML = data.companies.map(company => renderCompanyCard(company)).join('');
+    } catch(e) {
+        document.getElementById('companiesGrid').innerHTML = '';
+    }
+}
+
+async function loadCitiesStats() {
+    try {
+        const data = await API.get('/api/jobs/stats/overview');
+        const grid = document.getElementById('citiesGrid');
+
+        if (!data.cities || data.cities.length === 0) {
+            grid.innerHTML = '<p class="empty-text">Нет данных</p>';
+            return;
+        }
+
+        grid.innerHTML = data.cities.map(city => `
+            <a href="/jobs?city=${encodeURIComponent(city.city)}" class="city-card">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                <span class="city-name">${city.city}</span>
+                <span class="city-count">${city.count} ${pluralize(city.count, 'вакансия', 'вакансии', 'вакансий')}</span>
+            </a>
+        `).join('');
+    } catch(e) {}
+}
+
+// Hero search
+document.getElementById('heroSearchBtn').addEventListener('click', () => {
+    const query = document.getElementById('heroSearchInput').value.trim();
+    const city = document.getElementById('heroSearchCity').value;
+    let url = '/jobs?';
+    if (query) url += `q=${encodeURIComponent(query)}&`;
+    if (city) url += `city=${encodeURIComponent(city)}&`;
+    window.location.href = url;
+});
+
+document.getElementById('heroSearchInput').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') document.getElementById('heroSearchBtn').click();
+});
+
+document.querySelectorAll('.search-tag').forEach(tag => {
+    tag.addEventListener('click', () => {
+        document.getElementById('heroSearchInput').value = tag.dataset.query;
+        document.getElementById('heroSearchBtn').click();
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,419 @@
+{% extends "base.html" %}
+{% block title %}Настройки{% endblock %}
+
+{% block content %}
+<div class="page-wrapper">
+    <div class="container">
+        <div class="settings-layout">
+            <!-- Sidebar Nav -->
+            <aside class="settings-sidebar">
+                <h2 class="settings-sidebar-title">Настройки</h2>
+                <nav class="settings-nav">
+                    <a href="#profile" class="settings-nav-link active" data-section="profile">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                        Профиль
+                    </a>
+                    <a href="#security" class="settings-nav-link" data-section="security">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                        Безопасность
+                    </a>
+                    <a href="#appearance" class="settings-nav-link" data-section="appearance">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/></svg>
+                        Внешний вид
+                    </a>
+                    <a href="#notifications-settings" class="settings-nav-link" data-section="notifications-settings">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                        Уведомления
+                    </a>
+                    <a href="#danger" class="settings-nav-link settings-nav-danger" data-section="danger">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                        Аккаунт
+                    </a>
+                </nav>
+            </aside>
+
+            <!-- Content -->
+            <div class="settings-content" id="settingsContent">
+                <div class="loading-state"><div class="spinner"></div></div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let currentUser = null;
+
+document.addEventListener('DOMContentLoaded', async () => {
+    if (!Auth.isLoggedIn()) {
+        window.location.href = '/login?redirect=/settings';
+        return;
+    }
+
+    try {
+        const data = await API.get('/api/auth/me', true);
+        currentUser = data.user;
+    } catch(e) {
+        Auth.logout();
+        window.location.href = '/login';
+        return;
+    }
+
+    setupNavigation();
+    showSection('profile');
+});
+
+function setupNavigation() {
+    document.querySelectorAll('.settings-nav-link').forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const section = link.dataset.section;
+            showSection(section);
+            document.querySelectorAll('.settings-nav-link').forEach(l => l.classList.remove('active'));
+            link.classList.add('active');
+        });
+    });
+}
+
+function showSection(section) {
+    switch(section) {
+        case 'profile': renderProfileSettings(); break;
+        case 'security': renderSecuritySettings(); break;
+        case 'appearance': renderAppearanceSettings(); break;
+        case 'notifications-settings': renderNotificationsSettings(); break;
+        case 'danger': renderDangerSettings(); break;
+    }
+}
+
+function renderProfileSettings() {
+    const content = document.getElementById('settingsContent');
+    content.innerHTML = `
+        <div class="settings-section">
+            <div class="settings-section-header">
+                <h2 class="settings-section-title">Профиль</h2>
+                <p class="settings-section-desc">Обновите информацию о себе</p>
+            </div>
+
+            <form id="profileSettingsForm">
+                <div class="settings-card">
+                    <div class="form-group">
+                        <label class="form-label">Полное имя</label>
+                        <input type="text" class="form-input" id="settingName" value="${currentUser.name || ''}">
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Телефон</label>
+                            <input type="tel" class="form-input" id="settingPhone" value="${currentUser.phone || ''}" placeholder="+993 ...">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Город</label>
+                            <select class="form-select" id="settingCity">
+                                <option value="">Выберите город</option>
+                                ${['Ашхабад','Туркменабат','Дашогуз','Мары','Балканабат','Туркменбаши'].map(c =>
+                                    `<option value="${c}" ${currentUser.city === c ? 'selected' : ''}>${c}</option>`
+                                ).join('')}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Дата рождения</label>
+                            <input type="date" class="form-input" id="settingBirthDate" value="${currentUser.birth_date || ''}">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Пол</label>
+                            <select class="form-select" id="settingGender">
+                                <option value="">Не указан</option>
+                                <option value="male" ${currentUser.gender === 'male' ? 'selected' : ''}>Мужской</option>
+                                <option value="female" ${currentUser.gender === 'female' ? 'selected' : ''}>Женский</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">О себе</label>
+                        <textarea class="form-textarea" id="settingAbout" rows="4" placeholder="Расскажите о себе...">${currentUser.about || ''}</textarea>
+                    </div>
+                </div>
+
+                <div class="form-alert hidden" id="profileAlert"></div>
+
+                <div class="settings-footer">
+                    <button type="submit" class="btn btn-primary" id="saveProfileBtn">
+                        <span class="btn-text">Сохранить изменения</span>
+                        <span class="btn-loader hidden"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="spin"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg></span>
+                    </button>
+                </div>
+            </form>
+        </div>`;
+
+    document.getElementById('profileSettingsForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const btn = document.getElementById('saveProfileBtn');
+        btn.querySelector('.btn-text').classList.add('hidden');
+        btn.querySelector('.btn-loader').classList.remove('hidden');
+        btn.disabled = true;
+
+        const alert = document.getElementById('profileAlert');
+        alert.classList.add('hidden');
+
+        try {
+            const data = await API.put('/api/auth/update-profile', {
+                name: document.getElementById('settingName').value.trim(),
+                phone: document.getElementById('settingPhone').value.trim(),
+                city: document.getElementById('settingCity').value,
+                birth_date: document.getElementById('settingBirthDate').value || null,
+                gender: document.getElementById('settingGender').value,
+                about: document.getElementById('settingAbout').value.trim(),
+            }, true);
+
+            currentUser = data.user;
+            Auth.setUser(data.user);
+            showToast('Профиль обновлён', 'success');
+
+        } catch(err) {
+            alert.textContent = err.message || 'Ошибка сохранения';
+            alert.classList.remove('hidden');
+        } finally {
+            btn.querySelector('.btn-text').classList.remove('hidden');
+            btn.querySelector('.btn-loader').classList.add('hidden');
+            btn.disabled = false;
+        }
+    });
+}
+
+function renderSecuritySettings() {
+    const content = document.getElementById('settingsContent');
+    content.innerHTML = `
+        <div class="settings-section">
+            <div class="settings-section-header">
+                <h2 class="settings-section-title">Безопасность</h2>
+                <p class="settings-section-desc">Управление паролем и безопасностью аккаунта</p>
+            </div>
+
+            <div class="settings-card">
+                <h3 class="settings-card-title">Email адрес</h3>
+                <div class="settings-info-row">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                    <span>${currentUser.email}</span>
+                    <span class="verified-chip">Подтверждён</span>
+                </div>
+            </div>
+
+            <div class="settings-card">
+                <h3 class="settings-card-title">Изменить пароль</h3>
+                <form id="passwordForm">
+                    <div class="form-group">
+                        <label class="form-label">Текущий пароль</label>
+                        <div class="input-wrapper">
+                            <svg class="input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                            <input type="password" class="form-input" id="currentPassword" placeholder="Текущий пароль">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Новый пароль</label>
+                        <div class="input-wrapper">
+                            <svg class="input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                            <input type="password" class="form-input" id="newPassword" placeholder="Минимум 6 символов">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Подтвердите пароль</label>
+                        <div class="input-wrapper">
+                            <svg class="input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                            <input type="password" class="form-input" id="confirmNewPassword" placeholder="Повторите пароль">
+                        </div>
+                    </div>
+                    <span class="form-error" id="passwordChangeError"></span>
+                    <div class="settings-footer">
+                        <button type="submit" class="btn btn-primary">Изменить пароль</button>
+                    </div>
+                </form>
+            </div>
+        </div>`;
+
+    document.getElementById('passwordForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const current = document.getElementById('currentPassword').value;
+        const newPw = document.getElementById('newPassword').value;
+        const confirm = document.getElementById('confirmNewPassword').value;
+        const errEl = document.getElementById('passwordChangeError');
+
+        errEl.textContent = '';
+
+        if (!current || !newPw || !confirm) {
+            errEl.textContent = 'Заполните все поля';
+            return;
+        }
+        if (newPw.length < 6) {
+            errEl.textContent = 'Пароль минимум 6 символов';
+            return;
+        }
+        if (newPw !== confirm) {
+            errEl.textContent = 'Пароли не совпадают';
+            return;
+        }
+
+        try {
+            await API.put('/api/auth/update-profile', {
+                current_password: current,
+                new_password: newPw,
+            }, true);
+            showToast('Пароль изменён успешно', 'success');
+            e.target.reset();
+        } catch(err) {
+            errEl.textContent = err.message || 'Ошибка смены пароля';
+        }
+    });
+}
+
+function renderAppearanceSettings() {
+    const content = document.getElementById('settingsContent');
+    const currentTheme = localStorage.getItem('theme') || 'light';
+
+    content.innerHTML = `
+        <div class="settings-section">
+            <div class="settings-section-header">
+                <h2 class="settings-section-title">Внешний вид</h2>
+                <p class="settings-section-desc">Настройте тему интерфейса</p>
+            </div>
+
+            <div class="settings-card">
+                <h3 class="settings-card-title">Тема оформления</h3>
+                <div class="theme-options">
+                    <button class="theme-option-btn ${currentTheme === 'light' ? 'active' : ''}" data-theme="light">
+                        <div class="theme-preview theme-preview-light">
+                            <div class="theme-preview-bar"></div>
+                            <div class="theme-preview-content">
+                                <div class="theme-preview-card"></div>
+                                <div class="theme-preview-card"></div>
+                            </div>
+                        </div>
+                        <span>Светлая</span>
+                        ${currentTheme === 'light' ? '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>' : ''}
+                    </button>
+                    <button class="theme-option-btn ${currentTheme === 'dark' ? 'active' : ''}" data-theme="dark">
+                        <div class="theme-preview theme-preview-dark">
+                            <div class="theme-preview-bar"></div>
+                            <div class="theme-preview-content">
+                                <div class="theme-preview-card"></div>
+                                <div class="theme-preview-card"></div>
+                            </div>
+                        </div>
+                        <span>Тёмная</span>
+                        ${currentTheme === 'dark' ? '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>' : ''}
+                    </button>
+                </div>
+                <p class="settings-hint">Тема сохраняется автоматически в браузере</p>
+            </div>
+        </div>`;
+
+    document.querySelectorAll('.theme-option-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const theme = btn.dataset.theme;
+            ThemeManager.setTheme(theme);
+            renderAppearanceSettings();
+        });
+    });
+}
+
+function renderNotificationsSettings() {
+    const content = document.getElementById('settingsContent');
+    content.innerHTML = `
+        <div class="settings-section">
+            <div class="settings-section-header">
+                <h2 class="settings-section-title">Уведомления</h2>
+                <p class="settings-section-desc">Настройте какие уведомления вы хотите получать</p>
+            </div>
+
+            <div class="settings-card">
+                <div class="settings-toggle-list">
+                    <div class="settings-toggle-item">
+                        <div class="settings-toggle-info">
+                            <span class="toggle-label">Отклики на вакансии</span>
+                            <span class="toggle-desc">Уведомления о новых откликах</span>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="settings-toggle-item">
+                        <div class="settings-toggle-info">
+                            <span class="toggle-label">Сообщения</span>
+                            <span class="toggle-desc">Уведомления о новых сообщениях</span>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="settings-toggle-item">
+                        <div class="settings-toggle-info">
+                            <span class="toggle-label">Приглашения на собеседование</span>
+                            <span class="toggle-desc">Когда работодатель приглашает вас</span>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="settings-toggle-item">
+                        <div class="settings-toggle-info">
+                            <span class="toggle-label">Системные уведомления</span>
+                            <span class="toggle-desc">Важная информация о платформе</span>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>`;
+}
+
+function renderDangerSettings() {
+    const content = document.getElementById('settingsContent');
+    content.innerHTML = `
+        <div class="settings-section">
+            <div class="settings-section-header">
+                <h2 class="settings-section-title">Управление аккаунтом</h2>
+                <p class="settings-section-desc">Необратимые действия с аккаунтом</p>
+            </div>
+
+            <div class="settings-card settings-danger-card">
+                <div class="danger-item">
+                    <div class="danger-item-info">
+                        <h4>Выйти из системы</h4>
+                        <p>Завершить текущую сессию</p>
+                    </div>
+                    <button class="btn btn-ghost" onclick="handleLogout()">Выйти</button>
+                </div>
+                <div class="danger-divider"></div>
+                <div class="danger-item">
+                    <div class="danger-item-info">
+                        <h4 class="text-danger">Удалить аккаунт</h4>
+                        <p>Это действие необратимо. Все данные будут удалены.</p>
+                    </div>
+                    <button class="btn btn-danger" onclick="confirmDeleteAccount()">Удалить аккаунт</button>
+                </div>
+            </div>
+        </div>`;
+}
+
+function handleLogout() {
+    Auth.logout();
+    showToast('Вы вышли из системы', 'info');
+    setTimeout(() => window.location.href = '/', 800);
+}
+
+function confirmDeleteAccount() {
+    if (confirm('Вы уверены? Это действие необратимо. Все ваши данные, резюме и отклики будут удалены.')) {
+        if (confirm('Подтвердите удаление аккаунта ещё раз.')) {
+            showToast('Функция удаления аккаунта находится в разработке', 'info');
+        }
+    }
+}
+</script>
+{% endblock %}

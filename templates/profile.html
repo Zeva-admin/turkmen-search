@@ -1,0 +1,466 @@
+{% extends "base.html" %}
+{% block title %}Профиль{% endblock %}
+
+{% block content %}
+<div class="page-wrapper">
+    <div class="container">
+        <div id="profilePageContent">
+            <div class="loading-state">
+                <div class="spinner"></div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let profileUser = null;
+let isOwnProfile = false;
+
+document.addEventListener('DOMContentLoaded', async () => {
+    const params = new URLSearchParams(window.location.search);
+    const userId = params.get('id');
+
+    if (userId) {
+        await loadPublicProfile(parseInt(userId));
+    } else {
+        if (!Auth.isLoggedIn()) {
+            window.location.href = '/login?redirect=/profile';
+            return;
+        }
+        await loadOwnProfile();
+    }
+});
+
+async function loadOwnProfile() {
+    try {
+        const data = await API.get('/api/auth/me', true);
+        profileUser = data.user;
+        isOwnProfile = true;
+        renderProfile(profileUser);
+    } catch(e) {
+        Auth.logout();
+        window.location.href = '/login';
+    }
+}
+
+async function loadPublicProfile(userId) {
+    try {
+        const currentUser = Auth.getUser();
+        if (currentUser && currentUser.id === userId) {
+            isOwnProfile = true;
+        }
+        // Show basic public info
+        renderProfileSkeleton(userId);
+    } catch(e) {
+        document.getElementById('profilePageContent').innerHTML = `
+            <div class="error-state">
+                <h3>Профиль не найден</h3>
+                <a href="/" class="btn btn-primary">На главную</a>
+            </div>`;
+    }
+}
+
+function renderProfileSkeleton(userId) {
+    document.getElementById('profilePageContent').innerHTML = `
+        <div class="profile-page-layout">
+            <div class="profile-sidebar-col">
+                <div class="profile-card">
+                    <div class="profile-avatar-wrap">
+                        <div class="profile-avatar-xl">
+                            <svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                        </div>
+                    </div>
+                    <div class="profile-basic-info">
+                        <h1 class="profile-name">Пользователь</h1>
+                        <span class="profile-role-badge">Соискатель</span>
+                    </div>
+                    ${Auth.isLoggedIn() ? `
+                    <a href="/messages?user=${userId}" class="btn btn-primary btn-full" style="margin-top:16px;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                        Написать сообщение
+                    </a>` : `
+                    <a href="/login" class="btn btn-primary btn-full" style="margin-top:16px;">Войти для связи</a>`}
+                </div>
+            </div>
+            <div class="profile-main-col">
+                <div class="profile-section-card">
+                    <p style="color:var(--text-secondary);font-size:15px;">Публичный профиль пользователя</p>
+                </div>
+            </div>
+        </div>`;
+}
+
+function renderProfile(user) {
+    document.title = `${user.name} — Turkmen Search`;
+
+    const roleLabels = {
+        jobseeker: 'Соискатель',
+        employer: 'Работодатель',
+        admin: 'Администратор',
+    };
+
+    const content = document.getElementById('profilePageContent');
+    content.innerHTML = `
+        <div class="profile-page-layout">
+            <!-- Sidebar -->
+            <div class="profile-sidebar-col">
+                <div class="profile-card">
+                    <div class="profile-avatar-wrap">
+                        <div class="profile-avatar-xl" id="profileAvatarEl">
+                            ${user.avatar
+                                ? `<img src="/uploads/avatars/${user.avatar}" alt="${user.name}" style="width:100%;height:100%;object-fit:cover;">`
+                                : `<svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`}
+                        </div>
+                        ${isOwnProfile ? `
+                        <button class="profile-avatar-edit" title="Изменить фото">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                        </button>` : ''}
+                    </div>
+
+                    <div class="profile-basic-info">
+                        <h1 class="profile-name">${user.name}</h1>
+                        <span class="profile-role-badge profile-role-${user.role}">${roleLabels[user.role] || user.role}</span>
+                        ${user.city ? `
+                        <div class="profile-city">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                            ${user.city}
+                        </div>` : ''}
+                        ${user.last_seen ? `
+                        <div class="profile-last-seen">
+                            Последний визит: ${formatDate(user.last_seen)}
+                        </div>` : ''}
+                    </div>
+
+                    ${isOwnProfile ? `
+                    <div class="profile-quick-links">
+                        <a href="/settings" class="btn btn-ghost btn-full btn-sm">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>
+                            Настройки
+                        </a>
+                        <a href="/dashboard" class="btn btn-ghost btn-full btn-sm">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                            Личный кабинет
+                        </a>
+                    </div>` : `
+                    <a href="/messages?user=${user.id}" class="btn btn-primary btn-full" style="margin-top:16px;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                        Написать сообщение
+                    </a>`}
+                </div>
+
+                <!-- Contact Info (own profile) -->
+                ${isOwnProfile && (user.phone || user.email) ? `
+                <div class="sidebar-card">
+                    <h3 class="sidebar-card-title">Контакты</h3>
+                    <div class="contact-list">
+                        ${user.phone ? `
+                        <div class="contact-item">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.64 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 17z"/></svg>
+                            <span>${user.phone}</span>
+                        </div>` : ''}
+                        ${user.email ? `
+                        <div class="contact-item">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                            <span>${user.email}</span>
+                        </div>` : ''}
+                    </div>
+                </div>` : ''}
+            </div>
+
+            <!-- Main Content -->
+            <div class="profile-main-col">
+                ${user.about ? `
+                <div class="profile-section-card">
+                    <h2 class="profile-section-title">О себе</h2>
+                    <p class="profile-about">${user.about}</p>
+                </div>` : isOwnProfile ? `
+                <div class="profile-section-card profile-section-empty">
+                    <div class="profile-empty-tip">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                        <div>
+                            <h3>Расскажите о себе</h3>
+                            <p>Добавьте информацию о себе, чтобы работодатели узнали вас лучше</p>
+                            <a href="/settings" class="btn btn-primary btn-sm" style="margin-top:10px;">Заполнить профиль</a>
+                        </div>
+                    </div>
+                </div>` : ''}
+
+                ${isOwnProfile ? `
+                <div class="profile-section-card" id="profileResumesSection">
+                    <div class="profile-section-header">
+                        <h2 class="profile-section-title">Мои резюме</h2>
+                        <a href="/create-resume" class="btn btn-ghost btn-sm">+ Добавить</a>
+                    </div>
+                    <div id="profileResumesList">
+                        <div class="loading-state" style="padding:24px;"><div class="spinner"></div></div>
+                    </div>
+                </div>` : ''}
+
+                <div class="profile-section-card" id="profileStatsSection">
+                    <h2 class="profile-section-title">Активность</h2>
+                    <div class="profile-stats-row">
+                        <div class="profile-stat">
+                            <span class="profile-stat-num" id="profileStatResumes">—</span>
+                            <span class="profile-stat-label">Резюме</span>
+                        </div>
+                        <div class="profile-stat">
+                            <span class="profile-stat-num" id="profileStatApps">—</span>
+                            <span class="profile-stat-label">Откликов</span>
+                        </div>
+                        <div class="profile-stat">
+                            <span class="profile-stat-num">
+                                ${formatDate(user.created_at)}
+                            </span>
+                            <span class="profile-stat-label">На платформе с</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>`;
+
+    if (isOwnProfile) {
+        loadProfileData();
+    }
+}
+
+async function loadProfileData() {
+    try {
+        const [resumesData, appsData] = await Promise.all([
+            API.get('/api/resumes/my', true),
+            API.get('/api/applications/my', true),
+        ]);
+
+        const statResumes = document.getElementById('profileStatResumes');
+        const statApps = document.getElementById('profileStatApps');
+        if (statResumes) statResumes.textContent = resumesData.total || 0;
+        if (statApps) statApps.textContent = appsData.total || 0;
+
+        const resumesList = document.getElementById('profileResumesList');
+        if (resumesList) {
+            if (!resumesData.resumes || resumesData.resumes.length === 0) {
+                resumesList.innerHTML = `
+                    <div class="empty-state-sm">
+                        <p>У вас пока нет резюме</p>
+                        <a href="/create-resume" class="btn btn-primary btn-sm" style="margin-top:8px;">Создать резюме</a>
+                    </div>`;
+            } else {
+                resumesList.innerHTML = resumesData.resumes.slice(0, 3).map(r => `
+                    <div class="profile-resume-item">
+                        <div class="profile-resume-info">
+                            <a href="/resumes/${r.id}" class="profile-resume-title">${r.title}</a>
+                            <span class="profile-resume-meta">${r.salary} · ${r.city || ''} · ${r.views_count} просмотров</span>
+                        </div>
+                        <div class="profile-resume-actions">
+                            <span class="status-badge ${r.is_public ? 'status-invited' : 'status-rejected'}">${r.is_public ? 'Открытое' : 'Скрытое'}</span>
+                            <a href="/resumes/${r.id}" class="btn btn-ghost btn-sm">Просмотр</a>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+    } catch(e) {}
+}
+</script>
+
+<style>
+.profile-page-layout {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 24px;
+    align-items: start;
+}
+
+.profile-sidebar-col { position: sticky; top: calc(var(--header-height) + 16px); }
+
+.profile-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    text-align: center;
+    margin-bottom: 16px;
+}
+
+.profile-avatar-wrap {
+    position: relative;
+    display: inline-block;
+    margin-bottom: 16px;
+}
+
+.profile-avatar-xl {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background: var(--primary-light);
+    border: 3px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--primary);
+    overflow: hidden;
+    margin: 0 auto;
+}
+
+.profile-avatar-edit {
+    position: absolute;
+    bottom: 2px;
+    right: 2px;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--primary);
+    color: #fff;
+    border: 2px solid var(--surface);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all var(--transition);
+}
+
+.profile-avatar-edit:hover { background: var(--primary-hover); }
+
+.profile-name {
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+}
+
+.profile-role-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: var(--radius-full);
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 10px;
+}
+
+.profile-role-jobseeker { background: var(--primary-light); color: var(--primary); }
+.profile-role-employer { background: #F0FDF4; color: #16A34A; }
+.profile-role-admin { background: #FAF5FF; color: #7C3AED; }
+
+.profile-city {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-bottom: 4px;
+}
+
+.profile-last-seen {
+    font-size: 12px;
+    color: var(--text-tertiary);
+    margin-top: 6px;
+}
+
+.profile-quick-links {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 16px;
+}
+
+.profile-section-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    margin-bottom: 16px;
+}
+
+.profile-section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.profile-section-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 12px;
+}
+
+.profile-section-header .profile-section-title { margin-bottom: 0; }
+
+.profile-about {
+    font-size: 15px;
+    line-height: 1.7;
+    color: var(--text-secondary);
+}
+
+.profile-section-empty { background: var(--bg-secondary); border-style: dashed; }
+
+.profile-empty-tip {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    color: var(--text-secondary);
+}
+
+.profile-empty-tip svg { color: var(--text-tertiary); flex-shrink: 0; margin-top: 2px; }
+.profile-empty-tip h3 { font-size: 15px; font-weight: 700; color: var(--text-primary); margin-bottom: 4px; }
+.profile-empty-tip p { font-size: 13px; line-height: 1.5; }
+
+.profile-stats-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    text-align: center;
+}
+
+.profile-stat { padding: 12px; }
+.profile-stat-num {
+    display: block;
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--primary);
+    margin-bottom: 4px;
+}
+.profile-stat-label { font-size: 12px; color: var(--text-tertiary); }
+
+.profile-resume-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--border-light);
+    gap: 12px;
+}
+
+.profile-resume-item:last-child { border-bottom: none; }
+.profile-resume-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+    text-decoration: none;
+    display: block;
+    margin-bottom: 3px;
+}
+.profile-resume-title:hover { color: var(--primary); }
+.profile-resume-meta { font-size: 12px; color: var(--text-tertiary); }
+.profile-resume-actions { display: flex; gap: 8px; align-items: center; flex-shrink: 0; }
+
+.contact-list { display: flex; flex-direction: column; gap: 10px; }
+.contact-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    color: var(--text-secondary);
+}
+.contact-item svg { color: var(--text-tertiary); flex-shrink: 0; }
+
+@media (max-width: 768px) {
+    .profile-page-layout { grid-template-columns: 1fr; }
+    .profile-sidebar-col { position: static; }
+    .profile-stats-row { grid-template-columns: repeat(2, 1fr); }
+}
+</style>
+{% endblock %}

@@ -1,0 +1,479 @@
+{% extends "base.html" %}
+{% block title %}Вакансии{% endblock %}
+{% block nav_jobs %}active{% endblock %}
+
+{% block content %}
+<div class="page-wrapper">
+    <div class="container">
+        <div class="page-header">
+            <div>
+                <h1 class="page-title">Вакансии</h1>
+                <p class="page-subtitle" id="jobsCountText">Загрузка...</p>
+            </div>
+            <div class="page-header-actions">
+                <div class="view-toggle">
+                    <button class="view-btn active" id="viewList" title="Список">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+                    </button>
+                    <button class="view-btn" id="viewGrid" title="Сетка">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="jobs-page-layout">
+            <!-- SIDEBAR FILTERS -->
+            <aside class="filters-sidebar" id="filtersSidebar">
+                <div class="filters-header">
+                    <h3 class="filters-title">Фильтры</h3>
+                    <button class="btn-text filters-reset" id="resetFilters">Сбросить</button>
+                </div>
+
+                <!-- Search -->
+                <div class="filter-group">
+                    <label class="filter-label">Поиск</label>
+                    <div class="input-wrapper">
+                        <svg class="input-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+                        <input type="text" class="form-input" id="filterSearch" placeholder="Должность, компания...">
+                    </div>
+                </div>
+
+                <!-- City -->
+                <div class="filter-group">
+                    <label class="filter-label">Город</label>
+                    <div class="input-wrapper">
+                        <svg class="input-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                        <select class="form-select" id="filterCity">
+                            <option value="">Все города</option>
+                            <option value="Ашхабад">Ашхабад</option>
+                            <option value="Туркменабат">Туркменабат</option>
+                            <option value="Дашогуз">Дашогуз</option>
+                            <option value="Мары">Мары</option>
+                            <option value="Балканабат">Балканабат</option>
+                            <option value="Туркменбаши">Туркменбаши</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Employment Type -->
+                <div class="filter-group">
+                    <label class="filter-label">Тип занятости</label>
+                    <div class="checkbox-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" class="checkbox-input emp-type" value="full_time">
+                            <span class="checkbox-custom"></span>
+                            Полная занятость
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" class="checkbox-input emp-type" value="part_time">
+                            <span class="checkbox-custom"></span>
+                            Частичная занятость
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" class="checkbox-input emp-type" value="contract">
+                            <span class="checkbox-custom"></span>
+                            Контракт
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" class="checkbox-input emp-type" value="internship">
+                            <span class="checkbox-custom"></span>
+                            Стажировка
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" class="checkbox-input emp-type" value="remote">
+                            <span class="checkbox-custom"></span>
+                            Удалённая работа
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Experience -->
+                <div class="filter-group">
+                    <label class="filter-label">Опыт работы</label>
+                    <div class="radio-group">
+                        <label class="radio-label">
+                            <input type="radio" name="experience" class="radio-input" value="">
+                            <span class="radio-custom"></span>
+                            Любой
+                        </label>
+                        <label class="radio-label">
+                            <input type="radio" name="experience" class="radio-input" value="no_experience">
+                            <span class="radio-custom"></span>
+                            Без опыта
+                        </label>
+                        <label class="radio-label">
+                            <input type="radio" name="experience" class="radio-input" value="1_3">
+                            <span class="radio-custom"></span>
+                            От 1 до 3 лет
+                        </label>
+                        <label class="radio-label">
+                            <input type="radio" name="experience" class="radio-input" value="3_6">
+                            <span class="radio-custom"></span>
+                            От 3 до 6 лет
+                        </label>
+                        <label class="radio-label">
+                            <input type="radio" name="experience" class="radio-input" value="6_plus">
+                            <span class="radio-custom"></span>
+                            Более 6 лет
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Salary -->
+                <div class="filter-group">
+                    <label class="filter-label">Зарплата (TMT)</label>
+                    <div class="salary-range">
+                        <div class="input-wrapper">
+                            <input type="number" class="form-input" id="filterSalaryFrom" placeholder="От" min="0">
+                        </div>
+                        <span class="salary-range-sep">—</span>
+                        <div class="input-wrapper">
+                            <input type="number" class="form-input" id="filterSalaryTo" placeholder="До" min="0">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Remote -->
+                <div class="filter-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" class="checkbox-input" id="filterRemote">
+                        <span class="checkbox-custom"></span>
+                        Только удалённая работа
+                    </label>
+                </div>
+
+                <!-- Hot only -->
+                <div class="filter-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" class="checkbox-input" id="filterHot">
+                        <span class="checkbox-custom"></span>
+                        <span style="color: #ef4444;">🔥</span> Горячие вакансии
+                    </label>
+                </div>
+
+                <button class="btn btn-primary btn-full" id="applyFiltersBtn">
+                    Применить фильтры
+                </button>
+            </aside>
+
+            <!-- JOBS CONTENT -->
+            <div class="jobs-content">
+                <!-- Sort Bar -->
+                <div class="sort-bar">
+                    <div class="sort-bar-left">
+                        <span class="sort-label">Сортировка:</span>
+                        <div class="sort-buttons">
+                            <button class="sort-btn active" data-sort="date">По дате</button>
+                            <button class="sort-btn" data-sort="salary">По зарплате</button>
+                            <button class="sort-btn" data-sort="views">По популярности</button>
+                        </div>
+                    </div>
+                    <button class="btn-icon mobile-filter-btn" id="mobileFilterBtn">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="11" y1="18" x2="13" y2="18"/></svg>
+                        Фильтры
+                    </button>
+                </div>
+
+                <!-- Active Filters Tags -->
+                <div class="active-filters hidden" id="activeFilters"></div>
+
+                <!-- Jobs List -->
+                <div class="jobs-results" id="jobsResults">
+                    <div class="loading-state">
+                        <div class="spinner"></div>
+                        <p>Загрузка вакансий...</p>
+                    </div>
+                </div>
+
+                <!-- Pagination -->
+                <div class="pagination" id="jobsPagination"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Mobile Filter Overlay -->
+<div class="mobile-filter-overlay hidden" id="mobileFilterOverlay"></div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/search.js') }}"></script>
+<script>
+let currentPage = 1;
+let currentSort = 'date';
+let currentView = 'list';
+let isLoading = false;
+
+const filters = {
+    q: '',
+    city: '',
+    employment_type: '',
+    experience: '',
+    salary_from: '',
+    salary_to: '',
+    remote: false,
+    is_hot: false,
+};
+
+document.addEventListener('DOMContentLoaded', () => {
+    readURLParams();
+    loadJobs();
+    setupFilterListeners();
+    setupViewToggle();
+    setupMobileFilter();
+});
+
+function readURLParams() {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('q')) {
+        filters.q = params.get('q');
+        document.getElementById('filterSearch').value = filters.q;
+    }
+    if (params.get('city')) {
+        filters.city = params.get('city');
+        document.getElementById('filterCity').value = filters.city;
+    }
+    if (params.get('category_id')) {
+        filters.category_id = params.get('category_id');
+    }
+    if (params.get('is_hot') === 'true') {
+        filters.is_hot = true;
+        document.getElementById('filterHot').checked = true;
+    }
+}
+
+function setupFilterListeners() {
+    let searchTimer;
+    document.getElementById('filterSearch').addEventListener('input', (e) => {
+        clearTimeout(searchTimer);
+        searchTimer = setTimeout(() => {
+            filters.q = e.target.value.trim();
+            currentPage = 1;
+            loadJobs();
+        }, 500);
+    });
+
+    document.getElementById('filterCity').addEventListener('change', (e) => {
+        filters.city = e.target.value;
+        currentPage = 1;
+        loadJobs();
+    });
+
+    document.querySelectorAll('input[name="experience"]').forEach(radio => {
+        radio.addEventListener('change', (e) => {
+            filters.experience = e.target.value;
+            currentPage = 1;
+            loadJobs();
+        });
+    });
+
+    document.getElementById('filterRemote').addEventListener('change', (e) => {
+        filters.remote = e.target.checked;
+        currentPage = 1;
+        loadJobs();
+    });
+
+    document.getElementById('filterHot').addEventListener('change', (e) => {
+        filters.is_hot = e.target.checked;
+        currentPage = 1;
+        loadJobs();
+    });
+
+    document.getElementById('applyFiltersBtn').addEventListener('click', () => {
+        const empTypes = [...document.querySelectorAll('.emp-type:checked')].map(c => c.value);
+        filters.employment_type = empTypes.join(',');
+        filters.salary_from = document.getElementById('filterSalaryFrom').value;
+        filters.salary_to = document.getElementById('filterSalaryTo').value;
+        currentPage = 1;
+        loadJobs();
+
+        // Close mobile filter
+        document.getElementById('filtersSidebar').classList.remove('mobile-open');
+        document.getElementById('mobileFilterOverlay').classList.add('hidden');
+    });
+
+    document.getElementById('resetFilters').addEventListener('click', resetFilters);
+
+    document.querySelectorAll('.sort-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            currentSort = btn.dataset.sort;
+            currentPage = 1;
+            loadJobs();
+        });
+    });
+}
+
+function setupViewToggle() {
+    document.getElementById('viewList').addEventListener('click', () => {
+        currentView = 'list';
+        document.getElementById('viewList').classList.add('active');
+        document.getElementById('viewGrid').classList.remove('active');
+        document.getElementById('jobsResults').className = 'jobs-results';
+        loadJobs();
+    });
+
+    document.getElementById('viewGrid').addEventListener('click', () => {
+        currentView = 'grid';
+        document.getElementById('viewGrid').classList.add('active');
+        document.getElementById('viewList').classList.remove('active');
+        document.getElementById('jobsResults').className = 'jobs-results jobs-results-grid';
+        loadJobs();
+    });
+}
+
+function setupMobileFilter() {
+    document.getElementById('mobileFilterBtn').addEventListener('click', () => {
+        document.getElementById('filtersSidebar').classList.add('mobile-open');
+        document.getElementById('mobileFilterOverlay').classList.remove('hidden');
+    });
+
+    document.getElementById('mobileFilterOverlay').addEventListener('click', () => {
+        document.getElementById('filtersSidebar').classList.remove('mobile-open');
+        document.getElementById('mobileFilterOverlay').classList.add('hidden');
+    });
+}
+
+async function loadJobs() {
+    if (isLoading) return;
+    isLoading = true;
+
+    const results = document.getElementById('jobsResults');
+    results.innerHTML = `<div class="loading-state"><div class="spinner"></div><p>Загрузка вакансий...</p></div>`;
+
+    try {
+        let url = `/api/jobs?page=${currentPage}&sort=${currentSort}`;
+        if (filters.q) url += `&q=${encodeURIComponent(filters.q)}`;
+        if (filters.city) url += `&city=${encodeURIComponent(filters.city)}`;
+        if (filters.employment_type) url += `&employment_type=${encodeURIComponent(filters.employment_type)}`;
+        if (filters.experience) url += `&experience=${encodeURIComponent(filters.experience)}`;
+        if (filters.salary_from) url += `&salary_from=${filters.salary_from}`;
+        if (filters.salary_to) url += `&salary_to=${filters.salary_to}`;
+        if (filters.remote) url += `&remote=true`;
+        if (filters.is_hot) url += `&is_hot=true`;
+        if (filters.category_id) url += `&category_id=${filters.category_id}`;
+
+        const data = await API.get(url);
+
+        document.getElementById('jobsCountText').textContent =
+            `Найдено ${data.total} ${pluralize(data.total, 'вакансия', 'вакансии', 'вакансий')}`;
+
+        if (!data.jobs || data.jobs.length === 0) {
+            results.innerHTML = `
+                <div class="empty-state">
+                    <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+                    <h3>Вакансии не найдены</h3>
+                    <p>Попробуйте изменить параметры поиска</p>
+                    <button class="btn btn-primary" onclick="resetFilters()">Сбросить фильтры</button>
+                </div>`;
+            document.getElementById('jobsPagination').innerHTML = '';
+            return;
+        }
+
+        if (currentView === 'grid') {
+            results.innerHTML = data.jobs.map(job => renderJobCard(job)).join('');
+        } else {
+            results.innerHTML = data.jobs.map(job => renderJobListItem(job)).join('');
+        }
+
+        renderPagination(data.pages, data.current_page);
+        updateActiveFilters();
+
+    } catch(e) {
+        results.innerHTML = `<div class="error-state"><p>Ошибка загрузки. <button class="btn-text" onclick="loadJobs()">Повторить</button></p></div>`;
+    } finally {
+        isLoading = false;
+    }
+}
+
+function renderPagination(totalPages, page) {
+    const pag = document.getElementById('jobsPagination');
+    if (totalPages <= 1) { pag.innerHTML = ''; return; }
+
+    let html = '';
+    if (page > 1) html += `<button class="page-btn" onclick="goToPage(${page-1})">← Назад</button>`;
+
+    const start = Math.max(1, page - 2);
+    const end = Math.min(totalPages, page + 2);
+
+    if (start > 1) html += `<button class="page-btn" onclick="goToPage(1)">1</button>`;
+    if (start > 2) html += `<span class="page-dots">...</span>`;
+
+    for (let i = start; i <= end; i++) {
+        html += `<button class="page-btn ${i === page ? 'active' : ''}" onclick="goToPage(${i})">${i}</button>`;
+    }
+
+    if (end < totalPages - 1) html += `<span class="page-dots">...</span>`;
+    if (end < totalPages) html += `<button class="page-btn" onclick="goToPage(${totalPages})">${totalPages}</button>`;
+    if (page < totalPages) html += `<button class="page-btn" onclick="goToPage(${page+1})">Вперёд →</button>`;
+
+    pag.innerHTML = html;
+}
+
+function goToPage(page) {
+    currentPage = page;
+    loadJobs();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function resetFilters() {
+    filters.q = '';
+    filters.city = '';
+    filters.employment_type = '';
+    filters.experience = '';
+    filters.salary_from = '';
+    filters.salary_to = '';
+    filters.remote = false;
+    filters.is_hot = false;
+    delete filters.category_id;
+
+    document.getElementById('filterSearch').value = '';
+    document.getElementById('filterCity').value = '';
+    document.querySelectorAll('.emp-type').forEach(c => c.checked = false);
+    document.querySelectorAll('input[name="experience"]').forEach(r => r.checked = false);
+    document.getElementById('filterSalaryFrom').value = '';
+    document.getElementById('filterSalaryTo').value = '';
+    document.getElementById('filterRemote').checked = false;
+    document.getElementById('filterHot').checked = false;
+
+    currentPage = 1;
+    loadJobs();
+}
+
+function updateActiveFilters() {
+    const container = document.getElementById('activeFilters');
+    const tags = [];
+    if (filters.q) tags.push({ label: `Поиск: "${filters.q}"`, key: 'q' });
+    if (filters.city) tags.push({ label: `Город: ${filters.city}`, key: 'city' });
+    if (filters.experience) tags.push({ label: `Опыт: ${getExpLabel(filters.experience)}`, key: 'experience' });
+    if (filters.remote) tags.push({ label: 'Удалённо', key: 'remote' });
+    if (filters.is_hot) tags.push({ label: '🔥 Горячие', key: 'is_hot' });
+
+    if (tags.length === 0) {
+        container.classList.add('hidden');
+        return;
+    }
+
+    container.classList.remove('hidden');
+    container.innerHTML = tags.map(t =>
+        `<span class="filter-tag">${t.label} <button onclick="removeFilter('${t.key}')">×</button></span>`
+    ).join('');
+}
+
+function removeFilter(key) {
+    if (key === 'remote' || key === 'is_hot') filters[key] = false;
+    else filters[key] = '';
+    if (key === 'city') document.getElementById('filterCity').value = '';
+    if (key === 'q') document.getElementById('filterSearch').value = '';
+    currentPage = 1;
+    loadJobs();
+}
+
+function getExpLabel(val) {
+    const map = { 'no_experience': 'Без опыта', '1_3': '1–3 года', '3_6': '3–6 лет', '6_plus': '6+ лет' };
+    return map[val] || val;
+}
+</script>
+{% endblock %}
