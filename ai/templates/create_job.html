@@ -1,0 +1,492 @@
+{% extends "base.html" %}
+{% block title %}Разместить вакансию{% endblock %}
+
+{% block content %}
+<div class="page-wrapper">
+    <div class="container">
+        <div class="form-page-layout">
+            <div class="form-page-header">
+                <a href="/dashboard" class="back-link">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+                    Назад в кабинет
+                </a>
+                <h1 class="page-title" id="formPageTitle">Разместить вакансию</h1>
+            </div>
+
+            <div class="form-progress">
+                <div class="progress-step active" data-step="1">
+                    <div class="step-circle">1</div>
+                    <span class="step-label">Основное</span>
+                </div>
+                <div class="progress-line"></div>
+                <div class="progress-step" data-step="2">
+                    <div class="step-circle">2</div>
+                    <span class="step-label">Детали</span>
+                </div>
+                <div class="progress-line"></div>
+                <div class="progress-step" data-step="3">
+                    <div class="step-circle">3</div>
+                    <span class="step-label">Требования</span>
+                </div>
+            </div>
+
+            <form id="createJobForm" novalidate>
+                <!-- STEP 1: Basic Info -->
+                <div class="form-step active" id="step1">
+                    <div class="form-card">
+                        <h2 class="form-card-title">Основная информация</h2>
+
+                        <div class="form-group">
+                            <label class="form-label required">Название вакансии</label>
+                            <input type="text" class="form-input" id="jobTitle"
+                                placeholder="Например: Старший разработчик Python" maxlength="200">
+                            <span class="form-error" id="jobTitleError"></span>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label required">Город</label>
+                                <select class="form-select" id="jobCity">
+                                    <option value="">Выберите город</option>
+                                    <option value="Ашхабад">Ашхабад</option>
+                                    <option value="Туркменабат">Туркменабат</option>
+                                    <option value="Дашогуз">Дашогуз</option>
+                                    <option value="Мары">Мары</option>
+                                    <option value="Балканабат">Балканабат</option>
+                                    <option value="Туркменбаши">Туркменбаши</option>
+                                </select>
+                                <span class="form-error" id="jobCityError"></span>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Адрес</label>
+                                <input type="text" class="form-input" id="jobAddress"
+                                    placeholder="Улица, дом">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Категория</label>
+                            <select class="form-select" id="jobCategory">
+                                <option value="">Выберите категорию</option>
+                            </select>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Тип занятости</label>
+                                <select class="form-select" id="jobEmploymentType">
+                                    <option value="full_time">Полная занятость</option>
+                                    <option value="part_time">Частичная занятость</option>
+                                    <option value="contract">Контракт</option>
+                                    <option value="internship">Стажировка</option>
+                                    <option value="remote">Удалённая работа</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">График работы</label>
+                                <select class="form-select" id="jobSchedule">
+                                    <option value="">Не указан</option>
+                                    <option value="full_day">Полный день</option>
+                                    <option value="flexible">Гибкий</option>
+                                    <option value="shift">Сменный</option>
+                                    <option value="remote">Удалённо</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" class="checkbox-input" id="jobRemote">
+                                <span class="checkbox-custom"></span>
+                                Возможна удалённая работа
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-card">
+                        <h2 class="form-card-title">Заработная плата</h2>
+                        <div class="form-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" class="checkbox-input" id="salaryNegotiable">
+                                <span class="checkbox-custom"></span>
+                                По договорённости
+                            </label>
+                        </div>
+                        <div class="salary-fields" id="salaryFields">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label">Зарплата от (TMT)</label>
+                                    <input type="number" class="form-input" id="salaryFrom"
+                                        placeholder="0" min="0">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Зарплата до (TMT)</label>
+                                    <input type="number" class="form-input" id="salaryTo"
+                                        placeholder="0" min="0">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-nav">
+                        <div></div>
+                        <button type="button" class="btn btn-primary" onclick="nextStep(2)">
+                            Далее
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- STEP 2: Description -->
+                <div class="form-step hidden" id="step2">
+                    <div class="form-card">
+                        <h2 class="form-card-title">Описание вакансии</h2>
+
+                        <div class="form-group">
+                            <label class="form-label required">Описание</label>
+                            <textarea class="form-textarea" id="jobDescription" rows="6"
+                                placeholder="Расскажите о компании и вакансии..."></textarea>
+                            <span class="form-error" id="jobDescError"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Обязанности</label>
+                            <textarea class="form-textarea" id="jobResponsibilities" rows="5"
+                                placeholder="Что предстоит делать сотруднику..."></textarea>
+                            <p class="form-hint">Каждый пункт с новой строки</p>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Условия работы</label>
+                            <textarea class="form-textarea" id="jobConditions" rows="4"
+                                placeholder="Офис, соцпакет, обучение..."></textarea>
+                        </div>
+                    </div>
+
+                    <div class="form-nav">
+                        <button type="button" class="btn btn-ghost" onclick="prevStep(1)">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+                            Назад
+                        </button>
+                        <button type="button" class="btn btn-primary" onclick="nextStep(3)">
+                            Далее
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- STEP 3: Requirements -->
+                <div class="form-step hidden" id="step3">
+                    <div class="form-card">
+                        <h2 class="form-card-title">Требования к кандидату</h2>
+
+                        <div class="form-group">
+                            <label class="form-label">Требования</label>
+                            <textarea class="form-textarea" id="jobRequirements" rows="5"
+                                placeholder="Опыт, образование, личные качества..."></textarea>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Опыт работы</label>
+                                <select class="form-select" id="jobExperience">
+                                    <option value="">Не важен</option>
+                                    <option value="no_experience">Без опыта</option>
+                                    <option value="1_3">От 1 до 3 лет</option>
+                                    <option value="3_6">От 3 до 6 лет</option>
+                                    <option value="6_plus">Более 6 лет</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Образование</label>
+                                <select class="form-select" id="jobEducation">
+                                    <option value="">Не важно</option>
+                                    <option value="any">Любое</option>
+                                    <option value="secondary">Среднее</option>
+                                    <option value="higher">Высшее</option>
+                                    <option value="bachelor">Бакалавр</option>
+                                    <option value="master">Магистр</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-card">
+                        <h2 class="form-card-title">Ключевые навыки</h2>
+                        <div class="form-group">
+                            <label class="form-label">Добавьте навыки</label>
+                            <div class="skills-input-wrapper">
+                                <div class="skills-tags" id="skillsTags"></div>
+                                <input type="text" class="form-input" id="skillInput"
+                                    placeholder="Введите навык и нажмите Enter">
+                            </div>
+                            <p class="form-hint">Нажмите Enter или запятую для добавления навыка</p>
+                        </div>
+                    </div>
+
+                    <div class="form-alert hidden" id="jobFormAlert"></div>
+
+                    <div class="form-nav">
+                        <button type="button" class="btn btn-ghost" onclick="prevStep(2)">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+                            Назад
+                        </button>
+                        <button type="submit" class="btn btn-primary btn-lg" id="submitJobBtn">
+                            <span class="btn-text" id="submitJobText">Разместить вакансию</span>
+                            <span class="btn-loader hidden">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="spin"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+                            </span>
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let skills = [];
+let editJobId = null;
+
+document.addEventListener('DOMContentLoaded', async () => {
+    if (!Auth.isLoggedIn()) {
+        window.location.href = '/login?redirect=/create-job';
+        return;
+    }
+
+    const user = Auth.getUser();
+    if (user && user.role === 'jobseeker') {
+        showToast('Только работодатели могут создавать вакансии', 'error');
+        setTimeout(() => window.location.href = '/dashboard', 1500);
+        return;
+    }
+
+    await loadCategories();
+    setupSkillsInput();
+    setupSalaryToggle();
+    checkEditMode();
+
+    document.getElementById('createJobForm').addEventListener('submit', handleSubmit);
+});
+
+async function loadCategories() {
+    try {
+        const data = await API.get('/api/companies/categories');
+        const select = document.getElementById('jobCategory');
+        if (data.categories) {
+            data.categories.forEach(cat => {
+                const opt = document.createElement('option');
+                opt.value = cat.id;
+                opt.textContent = cat.name;
+                select.appendChild(opt);
+            });
+        }
+    } catch(e) {}
+}
+
+function setupSalaryToggle() {
+    document.getElementById('salaryNegotiable').addEventListener('change', (e) => {
+        document.getElementById('salaryFields').style.display = e.target.checked ? 'none' : 'block';
+    });
+}
+
+function setupSkillsInput() {
+    const input = document.getElementById('skillInput');
+    input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ',') {
+            e.preventDefault();
+            addSkill(input.value.trim());
+            input.value = '';
+        }
+    });
+    input.addEventListener('blur', () => {
+        if (input.value.trim()) {
+            addSkill(input.value.trim());
+            input.value = '';
+        }
+    });
+}
+
+function addSkill(skill) {
+    if (!skill || skills.includes(skill) || skills.length >= 20) return;
+    skills.push(skill);
+    renderSkills();
+}
+
+function removeSkill(skill) {
+    skills = skills.filter(s => s !== skill);
+    renderSkills();
+}
+
+function renderSkills() {
+    const container = document.getElementById('skillsTags');
+    container.innerHTML = skills.map(s => `
+        <span class="skill-tag skill-tag-removable">
+            ${s}
+            <button type="button" onclick="removeSkill('${s.replace(/'/g, "\\'")}')">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+        </span>
+    `).join('');
+}
+
+function nextStep(step) {
+    if (step === 2 && !validateStep1()) return;
+    if (step === 3 && !validateStep2()) return;
+
+    document.querySelectorAll('.form-step').forEach(s => s.classList.add('hidden'));
+    document.getElementById(`step${step}`).classList.remove('hidden');
+
+    document.querySelectorAll('.progress-step').forEach((s, i) => {
+        s.classList.toggle('active', i < step);
+        s.classList.toggle('completed', i < step - 1);
+    });
+
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function prevStep(step) {
+    document.querySelectorAll('.form-step').forEach(s => s.classList.add('hidden'));
+    document.getElementById(`step${step}`).classList.remove('hidden');
+    document.querySelectorAll('.progress-step').forEach((s, i) => {
+        s.classList.toggle('active', i < step);
+    });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function validateStep1() {
+    let valid = true;
+    const title = document.getElementById('jobTitle').value.trim();
+    const city = document.getElementById('jobCity').value;
+
+    document.getElementById('jobTitleError').textContent = '';
+    document.getElementById('jobCityError').textContent = '';
+
+    if (!title) {
+        document.getElementById('jobTitleError').textContent = 'Введите название вакансии';
+        valid = false;
+    }
+    if (!city) {
+        document.getElementById('jobCityError').textContent = 'Выберите город';
+        valid = false;
+    }
+    return valid;
+}
+
+function validateStep2() {
+    const desc = document.getElementById('jobDescription').value.trim();
+    document.getElementById('jobDescError').textContent = '';
+    if (!desc) {
+        document.getElementById('jobDescError').textContent = 'Введите описание вакансии';
+        return false;
+    }
+    return true;
+}
+
+async function checkEditMode() {
+    const params = new URLSearchParams(window.location.search);
+    editJobId = params.get('edit');
+
+    if (editJobId) {
+        document.getElementById('formPageTitle').textContent = 'Редактировать вакансию';
+        document.getElementById('submitJobText').textContent = 'Сохранить изменения';
+
+        try {
+            const data = await API.get(`/api/jobs/${editJobId}`);
+            fillForm(data.job);
+        } catch(e) {
+            showToast('Ошибка загрузки вакансии', 'error');
+        }
+    }
+}
+
+function fillForm(job) {
+    document.getElementById('jobTitle').value = job.title || '';
+    document.getElementById('jobCity').value = job.city || '';
+    document.getElementById('jobAddress').value = job.address || '';
+    document.getElementById('jobEmploymentType').value = job.employment_type || 'full_time';
+    document.getElementById('jobSchedule').value = job.schedule || '';
+    document.getElementById('jobRemote').checked = job.remote || false;
+    document.getElementById('salaryNegotiable').checked = job.salary_negotiable || false;
+    document.getElementById('jobDescription').value = job.description || '';
+    document.getElementById('jobResponsibilities').value = job.responsibilities || '';
+    document.getElementById('jobConditions').value = job.conditions || '';
+    document.getElementById('jobRequirements').value = job.requirements || '';
+    document.getElementById('jobExperience').value = job.experience || '';
+    document.getElementById('jobEducation').value = job.education || '';
+
+    if (job.salary_negotiable) {
+        document.getElementById('salaryFields').style.display = 'none';
+    } else {
+        if (job.salary_from) document.getElementById('salaryFrom').value = job.salary_from;
+        if (job.salary_to) document.getElementById('salaryTo').value = job.salary_to;
+    }
+
+    if (job.skills) {
+        try {
+            skills = JSON.parse(job.skills);
+            renderSkills();
+        } catch(e) {}
+    }
+
+    if (job.category_id) {
+        document.getElementById('jobCategory').value = job.category_id;
+    }
+}
+
+async function handleSubmit(e) {
+    e.preventDefault();
+
+    if (!validateStep1() || !validateStep2()) return;
+
+    const submitBtn = document.getElementById('submitJobBtn');
+    submitBtn.querySelector('.btn-text').classList.add('hidden');
+    submitBtn.querySelector('.btn-loader').classList.remove('hidden');
+    submitBtn.disabled = true;
+
+    const alert = document.getElementById('jobFormAlert');
+    alert.classList.add('hidden');
+
+    const payload = {
+        title: document.getElementById('jobTitle').value.trim(),
+        city: document.getElementById('jobCity').value,
+        address: document.getElementById('jobAddress').value.trim(),
+        employment_type: document.getElementById('jobEmploymentType').value,
+        schedule: document.getElementById('jobSchedule').value,
+        remote: document.getElementById('jobRemote').checked,
+        salary_negotiable: document.getElementById('salaryNegotiable').checked,
+        salary_from: document.getElementById('salaryFrom').value ? parseInt(document.getElementById('salaryFrom').value) : null,
+        salary_to: document.getElementById('salaryTo').value ? parseInt(document.getElementById('salaryTo').value) : null,
+        description: document.getElementById('jobDescription').value.trim(),
+        responsibilities: document.getElementById('jobResponsibilities').value.trim(),
+        conditions: document.getElementById('jobConditions').value.trim(),
+        requirements: document.getElementById('jobRequirements').value.trim(),
+        experience: document.getElementById('jobExperience').value,
+        education: document.getElementById('jobEducation').value,
+        skills: skills,
+        category_id: document.getElementById('jobCategory').value ? parseInt(document.getElementById('jobCategory').value) : null,
+    };
+
+    try {
+        let data;
+        if (editJobId) {
+            data = await API.put(`/api/jobs/${editJobId}`, payload, true);
+        } else {
+            data = await API.post('/api/jobs', payload, true);
+        }
+
+        showToast(editJobId ? 'Вакансия обновлена' : 'Вакансия размещена успешно!', 'success');
+        setTimeout(() => window.location.href = `/jobs/${data.job.id}`, 1000);
+
+    } catch(err) {
+        alert.textContent = err.message || 'Ошибка при сохранении';
+        alert.classList.remove('hidden');
+        submitBtn.querySelector('.btn-text').classList.remove('hidden');
+        submitBtn.querySelector('.btn-loader').classList.add('hidden');
+        submitBtn.disabled = false;
+    }
+}
+</script>
+{% endblock %}

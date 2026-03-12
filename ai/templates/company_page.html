@@ -1,0 +1,231 @@
+{% extends "base.html" %}
+{% block title %}Компания{% endblock %}
+
+{% block content %}
+<div class="page-wrapper">
+    <div class="container">
+
+        <div class="breadcrumb">
+            <a href="/">Главная</a>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+            <a href="/companies">Компании</a>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+            <span id="breadcrumbCompany">Загрузка...</span>
+        </div>
+
+        <div id="companyPageContent">
+            <div class="loading-state">
+                <div class="spinner"></div>
+                <p>Загрузка...</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const COMPANY_ID = {{ company_id }};
+
+document.addEventListener('DOMContentLoaded', () => {
+    loadCompanyPage();
+});
+
+async function loadCompanyPage() {
+    try {
+        const data = await API.get(`/api/companies/${COMPANY_ID}`);
+        const company = data.company;
+        renderCompanyPage(company);
+    } catch(e) {
+        document.getElementById('companyPageContent').innerHTML = `
+            <div class="error-state">
+                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                <h3>Компания не найдена</h3>
+                <a href="/companies" class="btn btn-primary">Все компании</a>
+            </div>`;
+    }
+}
+
+function renderCompanyPage(company) {
+    document.title = `${company.name} — Turkmen Search`;
+    document.getElementById('breadcrumbCompany').textContent = company.name;
+
+    const content = document.getElementById('companyPageContent');
+    content.innerHTML = `
+        <!-- Company Header -->
+        <div class="company-page-header">
+            <div class="company-page-cover">
+                ${company.cover
+                    ? `<img src="/uploads/logos/${company.cover}" alt="Обложка" class="company-cover-img">`
+                    : `<div class="company-cover-placeholder"></div>`}
+            </div>
+            <div class="company-page-header-content">
+                <div class="company-page-logo-wrap">
+                    ${company.logo
+                        ? `<img src="/uploads/logos/${company.logo}" alt="${company.name}" class="company-page-logo">`
+                        : `<div class="company-logo-placeholder-xl">${company.name[0]}</div>`}
+                </div>
+                <div class="company-page-header-info">
+                    <div class="company-page-title-row">
+                        <h1 class="company-page-name">${company.name}</h1>
+                        ${company.is_verified ? `
+                        <span class="verified-badge-lg">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01" stroke="white" stroke-width="2.5" fill="none"/></svg>
+                            Верифицирована
+                        </span>` : ''}
+                    </div>
+                    <div class="company-page-meta-row">
+                        ${company.industry ? `<span class="company-meta-chip">${company.industry}</span>` : ''}
+                        ${company.city ? `<span class="company-meta-chip">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                            ${company.city}
+                        </span>` : ''}
+                        ${company.employees_display ? `<span class="company-meta-chip">${company.employees_display}</span>` : ''}
+                        ${company.founded_year ? `<span class="company-meta-chip">С ${company.founded_year} года</span>` : ''}
+                    </div>
+                </div>
+                <div class="company-page-actions">
+                    ${company.website ? `<a href="${company.website}" target="_blank" rel="noopener" class="btn btn-ghost">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                        Сайт
+                    </a>` : ''}
+                    <button class="btn btn-ghost" onclick="shareCompany()">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+                        Поделиться
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Company Body -->
+        <div class="company-page-layout">
+            <div class="company-page-main">
+                ${company.description ? `
+                <div class="company-section-card">
+                    <h2 class="company-section-title">О компании</h2>
+                    <div class="company-text-content">${company.description.split('\n').map(p => `<p>${p}</p>`).join('')}</div>
+                </div>` : ''}
+
+                <!-- Jobs Section -->
+                <div class="company-section-card">
+                    <div class="company-section-header">
+                        <h2 class="company-section-title">Открытые вакансии <span class="section-count">${company.active_jobs}</span></h2>
+                    </div>
+                    <div id="companyJobsList">
+                        ${company.jobs && company.jobs.length > 0
+                            ? company.jobs.map(job => renderJobListItem(job)).join('')
+                            : `<div class="empty-state-sm"><p>Открытых вакансий нет</p></div>`}
+                    </div>
+                    ${company.jobs_total > 10 ? `
+                    <div class="load-more-wrap">
+                        <button class="btn btn-ghost" onclick="loadMoreJobs(2)">Показать ещё вакансии</button>
+                    </div>` : ''}
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <aside class="company-page-sidebar">
+                <div class="sidebar-card">
+                    <h3 class="sidebar-card-title">Информация</h3>
+                    <div class="company-info-list">
+                        ${company.type_display ? `
+                        <div class="company-info-item">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+                            <div>
+                                <span class="info-label">Тип компании</span>
+                                <span class="info-value">${company.type_display}</span>
+                            </div>
+                        </div>` : ''}
+                        ${company.employees_display ? `
+                        <div class="company-info-item">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+                            <div>
+                                <span class="info-label">Сотрудников</span>
+                                <span class="info-value">${company.employees_display}</span>
+                            </div>
+                        </div>` : ''}
+                        ${company.founded_year ? `
+                        <div class="company-info-item">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                            <div>
+                                <span class="info-label">Основана</span>
+                                <span class="info-value">${company.founded_year} год</span>
+                            </div>
+                        </div>` : ''}
+                        ${company.city ? `
+                        <div class="company-info-item">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                            <div>
+                                <span class="info-label">Город</span>
+                                <span class="info-value">${company.city}</span>
+                            </div>
+                        </div>` : ''}
+                        ${company.address ? `
+                        <div class="company-info-item">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+                            <div>
+                                <span class="info-label">Адрес</span>
+                                <span class="info-value">${company.address}</span>
+                            </div>
+                        </div>` : ''}
+                        ${company.website ? `
+                        <div class="company-info-item">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/></svg>
+                            <div>
+                                <span class="info-label">Сайт</span>
+                                <a href="${company.website}" target="_blank" class="info-link">${company.website.replace(/^https?:\/\//, '')}</a>
+                            </div>
+                        </div>` : ''}
+                        ${company.email ? `
+                        <div class="company-info-item">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                            <div>
+                                <span class="info-label">Email</span>
+                                <a href="mailto:${company.email}" class="info-link">${company.email}</a>
+                            </div>
+                        </div>` : ''}
+                        ${company.phone ? `
+                        <div class="company-info-item">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.64 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l.81-.81a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 17z"/></svg>
+                            <div>
+                                <span class="info-label">Телефон</span>
+                                <a href="tel:${company.phone}" class="info-link">${company.phone}</a>
+                            </div>
+                        </div>` : ''}
+                    </div>
+                </div>
+
+                <div class="sidebar-card">
+                    <div class="company-stats-grid">
+                        <div class="company-stat">
+                            <span class="company-stat-num">${company.active_jobs}</span>
+                            <span class="company-stat-label">Вакансий</span>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+        </div>`;
+}
+
+async function loadMoreJobs(page) {
+    try {
+        const data = await API.get(`/api/companies/${COMPANY_ID}?page=${page}`);
+        const list = document.getElementById('companyJobsList');
+        if (data.company.jobs && data.company.jobs.length > 0) {
+            data.company.jobs.forEach(job => {
+                list.insertAdjacentHTML('beforeend', renderJobListItem(job));
+            });
+        }
+    } catch(e) {}
+}
+
+function shareCompany() {
+    if (navigator.share) {
+        navigator.share({ title: document.title, url: window.location.href });
+    } else {
+        navigator.clipboard.writeText(window.location.href);
+        showToast('Ссылка скопирована', 'success');
+    }
+}
+</script>
+{% endblock %}

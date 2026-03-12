@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block title %}Страница не найдена{% endblock %}
+
+{% block content %}
+<div class="error-page">
+    <div class="container">
+        <div class="error-page-content">
+            <div class="error-code">404</div>
+            <div class="error-illustration">
+                <svg width="120" height="120" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" class="error-svg">
+                    <circle cx="11" cy="11" r="8"/>
+                    <path d="m21 21-4.35-4.35"/>
+                    <line x1="8" y1="11" x2="14" y2="11"/>
+                </svg>
+            </div>
+            <h1 class="error-title">Страница не найдена</h1>
+            <p class="error-desc">Страница, которую вы ищете, не существует или была перемещена.</p>
+            <div class="error-actions">
+                <a href="/" class="btn btn-primary btn-lg">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+                    На главную
+                </a>
+                <a href="/jobs" class="btn btn-ghost btn-lg">Смотреть вакансии</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.error-page {
+    min-height: calc(100vh - var(--header-height));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 48px 0;
+    background: var(--bg-secondary);
+}
+.error-page-content {
+    text-align: center;
+    max-width: 480px;
+    margin: 0 auto;
+}
+.error-code {
+    font-size: 120px;
+    font-weight: 900;
+    color: var(--primary);
+    line-height: 1;
+    margin-bottom: 8px;
+    letter-spacing: -4px;
+    opacity: 0.15;
+}
+.error-illustration {
+    margin: -40px auto 24px;
+}
+.error-svg { color: var(--primary); opacity: 0.6; margin: 0 auto; }
+.error-title {
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--text-primary);
+    margin-bottom: 12px;
+}
+.error-desc {
+    font-size: 16px;
+    color: var(--text-secondary);
+    margin-bottom: 32px;
+    line-height: 1.6;
+}
+.error-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+</style>
+{% endblock %}

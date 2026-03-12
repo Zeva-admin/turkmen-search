@@ -1,0 +1,583 @@
+{% extends "base.html" %}
+{% block title %}Создать резюме{% endblock %}
+
+{% block content %}
+<div class="page-wrapper">
+    <div class="container">
+        <div class="form-page-layout">
+            <div class="form-page-header">
+                <a href="/dashboard" class="back-link">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+                    Назад в кабинет
+                </a>
+                <h1 class="page-title" id="resumeFormTitle">Создать резюме</h1>
+            </div>
+
+            <div class="form-layout-two">
+                <!-- Form -->
+                <form id="createResumeForm" novalidate>
+
+                    <!-- Personal Info -->
+                    <div class="form-card">
+                        <h2 class="form-card-title">Личные данные</h2>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label required">Фамилия</label>
+                                <input type="text" class="form-input" id="resLastName" placeholder="Иванов">
+                                <span class="form-error" id="lastNameError"></span>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label required">Имя</label>
+                                <input type="text" class="form-input" id="resFirstName" placeholder="Иван">
+                                <span class="form-error" id="firstNameError"></span>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Отчество</label>
+                                <input type="text" class="form-input" id="resMiddleName" placeholder="Иванович">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Дата рождения</label>
+                                <input type="date" class="form-input" id="resBirthDate">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Пол</label>
+                                <select class="form-select" id="resGender">
+                                    <option value="">Не указан</option>
+                                    <option value="male">Мужской</option>
+                                    <option value="female">Женский</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Город</label>
+                                <select class="form-select" id="resCity">
+                                    <option value="">Выберите город</option>
+                                    <option value="Ашхабад">Ашхабад</option>
+                                    <option value="Туркменабат">Туркменабат</option>
+                                    <option value="Дашогуз">Дашогуз</option>
+                                    <option value="Мары">Мары</option>
+                                    <option value="Балканабат">Балканабат</option>
+                                    <option value="Туркменбаши">Туркменбаши</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Телефон</label>
+                                <input type="tel" class="form-input" id="resPhone" placeholder="+993 ...">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Email</label>
+                                <input type="email" class="form-input" id="resEmail" placeholder="email@mail.com">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Desired Position -->
+                    <div class="form-card">
+                        <h2 class="form-card-title">Желаемая должность</h2>
+                        <div class="form-group">
+                            <label class="form-label required">Заголовок резюме</label>
+                            <input type="text" class="form-input" id="resTitle"
+                                placeholder="Например: Опытный программист Python">
+                            <span class="form-error" id="resTitleError"></span>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Желаемая должность</label>
+                            <input type="text" class="form-input" id="resDesiredPosition"
+                                placeholder="Python разработчик">
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Желаемая зарплата (TMT)</label>
+                                <input type="number" class="form-input" id="resSalary"
+                                    placeholder="0" min="0">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Тип занятости</label>
+                                <select class="form-select" id="resEmploymentType">
+                                    <option value="">Любой</option>
+                                    <option value="full_time">Полная занятость</option>
+                                    <option value="part_time">Частичная</option>
+                                    <option value="contract">Контракт</option>
+                                    <option value="internship">Стажировка</option>
+                                    <option value="remote">Удалённо</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Готовность к командировкам и переезду</label>
+                            <div class="checkbox-row">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" class="checkbox-input" id="resRelocation">
+                                    <span class="checkbox-custom"></span>
+                                    Готов к переезду
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" class="checkbox-input" id="resBusinessTrip">
+                                    <span class="checkbox-custom"></span>
+                                    Готов к командировкам
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- About -->
+                    <div class="form-card">
+                        <h2 class="form-card-title">О себе</h2>
+                        <div class="form-group">
+                            <textarea class="form-textarea" id="resAbout" rows="5"
+                                placeholder="Расскажите о себе, своём опыте и целях..."></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Experience -->
+                    <div class="form-card">
+                        <h2 class="form-card-title">Опыт работы</h2>
+                        <div id="experienceList"></div>
+                        <button type="button" class="btn btn-ghost btn-full" id="addExpBtn">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                            Добавить место работы
+                        </button>
+                    </div>
+
+                    <!-- Education -->
+                    <div class="form-card">
+                        <h2 class="form-card-title">Образование</h2>
+                        <div id="educationList"></div>
+                        <button type="button" class="btn btn-ghost btn-full" id="addEduBtn">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                            Добавить образование
+                        </button>
+                    </div>
+
+                    <!-- Skills -->
+                    <div class="form-card">
+                        <h2 class="form-card-title">Ключевые навыки</h2>
+                        <div class="form-group">
+                            <div class="skills-input-wrapper">
+                                <div class="skills-tags" id="resumeSkillsTags"></div>
+                                <input type="text" class="form-input" id="resumeSkillInput"
+                                    placeholder="Введите навык и нажмите Enter">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Languages -->
+                    <div class="form-card">
+                        <h2 class="form-card-title">Знание языков</h2>
+                        <div id="languageList"></div>
+                        <button type="button" class="btn btn-ghost btn-full" id="addLangBtn">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                            Добавить язык
+                        </button>
+                    </div>
+
+                    <!-- Visibility -->
+                    <div class="form-card">
+                        <h2 class="form-card-title">Настройки видимости</h2>
+                        <div class="form-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" class="checkbox-input" id="resPublic" checked>
+                                <span class="checkbox-custom"></span>
+                                Открытое резюме (видно работодателям)
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-alert hidden" id="resumeFormAlert"></div>
+
+                    <div class="form-nav">
+                        <a href="/dashboard" class="btn btn-ghost">Отмена</a>
+                        <button type="submit" class="btn btn-primary btn-lg" id="submitResumeBtn">
+                            <span class="btn-text" id="resumeBtnText">Сохранить резюме</span>
+                            <span class="btn-loader hidden">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="spin"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+                            </span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let resumeSkills = [];
+let experiences = [];
+let educations = [];
+let languages = [];
+let editResumeId = null;
+
+document.addEventListener('DOMContentLoaded', () => {
+    if (!Auth.isLoggedIn()) {
+        window.location.href = '/login?redirect=/create-resume';
+        return;
+    }
+
+    setupSkillsInput();
+    setupButtons();
+    checkEditMode();
+
+    document.getElementById('createResumeForm').addEventListener('submit', handleResumeSubmit);
+});
+
+function setupSkillsInput() {
+    const input = document.getElementById('resumeSkillInput');
+    input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ',') {
+            e.preventDefault();
+            addResumeSkill(input.value.trim());
+            input.value = '';
+        }
+    });
+}
+
+function addResumeSkill(skill) {
+    if (!skill || resumeSkills.includes(skill) || resumeSkills.length >= 20) return;
+    resumeSkills.push(skill);
+    renderResumeSkills();
+}
+
+function removeResumeSkill(skill) {
+    resumeSkills = resumeSkills.filter(s => s !== skill);
+    renderResumeSkills();
+}
+
+function renderResumeSkills() {
+    const container = document.getElementById('resumeSkillsTags');
+    container.innerHTML = resumeSkills.map(s => `
+        <span class="skill-tag skill-tag-removable">
+            ${s}
+            <button type="button" onclick="removeResumeSkill('${s.replace(/'/g, "\\'")}')">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+        </span>
+    `).join('');
+}
+
+function setupButtons() {
+    document.getElementById('addExpBtn').addEventListener('click', addExperience);
+    document.getElementById('addEduBtn').addEventListener('click', addEducation);
+    document.getElementById('addLangBtn').addEventListener('click', addLanguage);
+}
+
+function addExperience(data = {}) {
+    const idx = experiences.length;
+    experiences.push(data);
+
+    const div = document.createElement('div');
+    div.className = 'dynamic-item-block';
+    div.id = `exp_${idx}`;
+    div.innerHTML = `
+        <div class="dynamic-item-header">
+            <h4>Место работы ${idx + 1}</h4>
+            <button type="button" class="btn-icon btn-danger-icon" onclick="removeExperience(${idx})">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+            </button>
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label class="form-label required">Компания</label>
+                <input type="text" class="form-input exp-company" data-idx="${idx}" value="${data.company_name || ''}" placeholder="Название компании">
+            </div>
+            <div class="form-group">
+                <label class="form-label required">Должность</label>
+                <input type="text" class="form-input exp-position" data-idx="${idx}" value="${data.position || ''}" placeholder="Ваша должность">
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label class="form-label">Дата начала</label>
+                <input type="date" class="form-input exp-start" data-idx="${idx}" value="${data.start_date || ''}">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Дата окончания</label>
+                <input type="date" class="form-input exp-end" data-idx="${idx}" value="${data.end_date || ''}">
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="checkbox-label">
+                <input type="checkbox" class="checkbox-input exp-current" data-idx="${idx}" ${data.is_current ? 'checked' : ''}>
+                <span class="checkbox-custom"></span>
+                По настоящее время
+            </label>
+        </div>
+        <div class="form-group">
+            <label class="form-label">Описание обязанностей</label>
+            <textarea class="form-textarea exp-desc" data-idx="${idx}" rows="3" placeholder="Что вы делали...">${data.description || ''}</textarea>
+        </div>
+    `;
+    document.getElementById('experienceList').appendChild(div);
+}
+
+function removeExperience(idx) {
+    const el = document.getElementById(`exp_${idx}`);
+    if (el) el.remove();
+    experiences[idx] = null;
+}
+
+function addEducation(data = {}) {
+    const idx = educations.length;
+    educations.push(data);
+
+    const div = document.createElement('div');
+    div.className = 'dynamic-item-block';
+    div.id = `edu_${idx}`;
+    div.innerHTML = `
+        <div class="dynamic-item-header">
+            <h4>Учебное заведение ${idx + 1}</h4>
+            <button type="button" class="btn-icon btn-danger-icon" onclick="removeEducation(${idx})">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+            </button>
+        </div>
+        <div class="form-group">
+            <label class="form-label required">Учебное заведение</label>
+            <input type="text" class="form-input edu-institution" data-idx="${idx}" value="${data.institution || ''}" placeholder="Университет, колледж...">
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label class="form-label">Факультет</label>
+                <input type="text" class="form-input edu-faculty" data-idx="${idx}" value="${data.faculty || ''}" placeholder="Факультет">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Специальность</label>
+                <input type="text" class="form-input edu-specialty" data-idx="${idx}" value="${data.specialty || ''}" placeholder="Специальность">
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label class="form-label">Год начала</label>
+                <input type="number" class="form-input edu-start" data-idx="${idx}" value="${data.start_year || ''}" placeholder="2018" min="1950" max="2030">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Год окончания</label>
+                <input type="number" class="form-input edu-end" data-idx="${idx}" value="${data.end_year || ''}" placeholder="2022" min="1950" max="2030">
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="form-label">Степень</label>
+            <select class="form-select edu-degree" data-idx="${idx}">
+                <option value="">Не указана</option>
+                <option value="Бакалавр" ${data.degree === 'Бакалавр' ? 'selected' : ''}>Бакалавр</option>
+                <option value="Магистр" ${data.degree === 'Магистр' ? 'selected' : ''}>Магистр</option>
+                <option value="Специалист" ${data.degree === 'Специалист' ? 'selected' : ''}>Специалист</option>
+                <option value="Кандидат наук" ${data.degree === 'Кандидат наук' ? 'selected' : ''}>Кандидат наук</option>
+            </select>
+        </div>
+    `;
+    document.getElementById('educationList').appendChild(div);
+}
+
+function removeEducation(idx) {
+    const el = document.getElementById(`edu_${idx}`);
+    if (el) el.remove();
+    educations[idx] = null;
+}
+
+function addLanguage(data = {}) {
+    const idx = languages.length;
+    languages.push(data);
+
+    const div = document.createElement('div');
+    div.className = 'dynamic-item-block dynamic-item-inline';
+    div.id = `lang_${idx}`;
+    div.innerHTML = `
+        <div class="form-row" style="margin:0; align-items:flex-end;">
+            <div class="form-group">
+                <label class="form-label">Язык</label>
+                <input type="text" class="form-input lang-name" data-idx="${idx}" value="${data.name || ''}" placeholder="Туркменский, Русский...">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Уровень</label>
+                <select class="form-select lang-level" data-idx="${idx}">
+                    <option value="beginner" ${data.level === 'beginner' ? 'selected' : ''}>Начинающий</option>
+                    <option value="elementary" ${data.level === 'elementary' ? 'selected' : ''}>Базовый</option>
+                    <option value="intermediate" ${data.level === 'intermediate' ? 'selected' : ''}>Средний</option>
+                    <option value="upper" ${data.level === 'upper' ? 'selected' : ''}>Выше среднего</option>
+                    <option value="fluent" ${data.level === 'fluent' ? 'selected' : ''}>Свободный</option>
+                    <option value="native" ${data.level === 'native' ? 'selected' : ''}>Родной</option>
+                </select>
+            </div>
+            <div class="form-group" style="flex:0;">
+                <button type="button" class="btn-icon btn-danger-icon" onclick="removeLanguage(${idx})" style="margin-bottom:8px;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+                </button>
+            </div>
+        </div>
+    `;
+    document.getElementById('languageList').appendChild(div);
+}
+
+function removeLanguage(idx) {
+    const el = document.getElementById(`lang_${idx}`);
+    if (el) el.remove();
+    languages[idx] = null;
+}
+
+async function checkEditMode() {
+    const params = new URLSearchParams(window.location.search);
+    editResumeId = params.get('edit');
+
+    if (editResumeId) {
+        document.getElementById('resumeFormTitle').textContent = 'Редактировать резюме';
+        document.getElementById('resumeBtnText').textContent = 'Сохранить изменения';
+
+        try {
+            const data = await API.get(`/api/resumes/${editResumeId}`);
+            fillResumeForm(data.resume);
+        } catch(e) {
+            showToast('Ошибка загрузки резюме', 'error');
+        }
+    }
+}
+
+function fillResumeForm(resume) {
+    document.getElementById('resLastName').value = resume.last_name || '';
+    document.getElementById('resFirstName').value = resume.first_name || '';
+    document.getElementById('resMiddleName').value = resume.middle_name || '';
+    document.getElementById('resBirthDate').value = resume.birth_date || '';
+    document.getElementById('resGender').value = resume.gender || '';
+    document.getElementById('resCity').value = resume.city || '';
+    document.getElementById('resPhone').value = resume.phone || '';
+    document.getElementById('resEmail').value = resume.email || '';
+    document.getElementById('resTitle').value = resume.title || '';
+    document.getElementById('resDesiredPosition').value = resume.desired_position || '';
+    document.getElementById('resSalary').value = resume.desired_salary || '';
+    document.getElementById('resEmploymentType').value = resume.employment_type || '';
+    document.getElementById('resRelocation').checked = resume.relocation || false;
+    document.getElementById('resBusinessTrip').checked = resume.business_trip || false;
+    document.getElementById('resAbout').value = resume.about || '';
+    document.getElementById('resPublic').checked = resume.is_public !== false;
+
+    if (resume.skills) {
+        try {
+            resumeSkills = JSON.parse(resume.skills);
+            renderResumeSkills();
+        } catch(e) {}
+    }
+
+    if (resume.experiences) {
+        resume.experiences.forEach(exp => addExperience(exp));
+    }
+    if (resume.educations) {
+        resume.educations.forEach(edu => addEducation(edu));
+    }
+    if (resume.languages) {
+        resume.languages.forEach(lang => addLanguage(lang));
+    }
+}
+
+function collectFormData() {
+    const expData = [];
+    document.querySelectorAll('.exp-company').forEach(el => {
+        const idx = el.dataset.idx;
+        if (!el.value.trim()) return;
+        expData.push({
+            company_name: el.value.trim(),
+            position: document.querySelector(`.exp-position[data-idx="${idx}"]`)?.value.trim() || '',
+            start_date: document.querySelector(`.exp-start[data-idx="${idx}"]`)?.value || null,
+            end_date: document.querySelector(`.exp-end[data-idx="${idx}"]`)?.value || null,
+            is_current: document.querySelector(`.exp-current[data-idx="${idx}"]`)?.checked || false,
+            description: document.querySelector(`.exp-desc[data-idx="${idx}"]`)?.value.trim() || '',
+        });
+    });
+
+    const eduData = [];
+    document.querySelectorAll('.edu-institution').forEach(el => {
+        const idx = el.dataset.idx;
+        if (!el.value.trim()) return;
+        eduData.push({
+            institution: el.value.trim(),
+            faculty: document.querySelector(`.edu-faculty[data-idx="${idx}"]`)?.value.trim() || '',
+            specialty: document.querySelector(`.edu-specialty[data-idx="${idx}"]`)?.value.trim() || '',
+            degree: document.querySelector(`.edu-degree[data-idx="${idx}"]`)?.value || '',
+            start_year: parseInt(document.querySelector(`.edu-start[data-idx="${idx}"]`)?.value) || null,
+            end_year: parseInt(document.querySelector(`.edu-end[data-idx="${idx}"]`)?.value) || null,
+        });
+    });
+
+    const langData = [];
+    document.querySelectorAll('.lang-name').forEach(el => {
+        const idx = el.dataset.idx;
+        if (!el.value.trim()) return;
+        langData.push({
+            name: el.value.trim(),
+            level: document.querySelector(`.lang-level[data-idx="${idx}"]`)?.value || 'beginner',
+        });
+    });
+
+    return {
+        last_name: document.getElementById('resLastName').value.trim(),
+        first_name: document.getElementById('resFirstName').value.trim(),
+        middle_name: document.getElementById('resMiddleName').value.trim(),
+        birth_date: document.getElementById('resBirthDate').value || null,
+        gender: document.getElementById('resGender').value,
+        city: document.getElementById('resCity').value,
+        phone: document.getElementById('resPhone').value.trim(),
+        email: document.getElementById('resEmail').value.trim(),
+        title: document.getElementById('resTitle').value.trim(),
+        desired_position: document.getElementById('resDesiredPosition').value.trim(),
+        desired_salary: parseInt(document.getElementById('resSalary').value) || null,
+        employment_type: document.getElementById('resEmploymentType').value,
+        relocation: document.getElementById('resRelocation').checked,
+        business_trip: document.getElementById('resBusinessTrip').checked,
+        about: document.getElementById('resAbout').value.trim(),
+        skills: resumeSkills,
+        is_public: document.getElementById('resPublic').checked,
+        experiences: expData,
+        educations: eduData,
+        languages: langData,
+    };
+}
+
+async function handleResumeSubmit(e) {
+    e.preventDefault();
+
+    const errors = {};
+    const data = collectFormData();
+
+    if (!data.first_name) errors.first_name = 'Введите имя';
+    if (!data.last_name) errors.last_name = 'Введите фамилию';
+    if (!data.title) errors.title = 'Введите заголовок резюме';
+
+    document.getElementById('firstNameError').textContent = errors.first_name || '';
+    document.getElementById('lastNameError').textContent = errors.last_name || '';
+    document.getElementById('resTitleError').textContent = errors.title || '';
+
+    if (Object.keys(errors).length > 0) return;
+
+    const btn = document.getElementById('submitResumeBtn');
+    btn.querySelector('.btn-text').classList.add('hidden');
+    btn.querySelector('.btn-loader').classList.remove('hidden');
+    btn.disabled = true;
+
+    const alert = document.getElementById('resumeFormAlert');
+    alert.classList.add('hidden');
+
+    try {
+        let result;
+        if (editResumeId) {
+            result = await API.put(`/api/resumes/${editResumeId}`, data, true);
+        } else {
+            result = await API.post('/api/resumes', data, true);
+        }
+
+        showToast(editResumeId ? 'Резюме обновлено' : 'Резюме создано успешно!', 'success');
+        setTimeout(() => window.location.href = `/resumes/${result.resume.id}`, 1000);
+
+    } catch(err) {
+        alert.textContent = err.message || 'Ошибка при сохранении резюме';
+        alert.classList.remove('hidden');
+        btn.querySelector('.btn-text').classList.remove('hidden');
+        btn.querySelector('.btn-loader').classList.add('hidden');
+        btn.disabled = false;
+    }
+}
+</script>
+{% endblock %}

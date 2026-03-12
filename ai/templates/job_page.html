@@ -1,0 +1,378 @@
+{% extends "base.html" %}
+{% block title %}Вакансия{% endblock %}
+
+{% block content %}
+<div class="page-wrapper">
+    <div class="container">
+
+        <!-- Breadcrumb -->
+        <div class="breadcrumb" id="breadcrumb">
+            <a href="/">Главная</a>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+            <a href="/jobs">Вакансии</a>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+            <span id="breadcrumbTitle">Загрузка...</span>
+        </div>
+
+        <div class="job-page-layout" id="jobPageLayout">
+            <!-- LOADING STATE -->
+            <div class="loading-state" id="jobLoading">
+                <div class="spinner"></div>
+                <p>Загрузка вакансии...</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Apply Modal -->
+<div class="modal hidden" id="applyModal">
+    <div class="modal-overlay" id="applyModalOverlay"></div>
+    <div class="modal-dialog">
+        <div class="modal-header">
+            <h3 class="modal-title">Отклик на вакансию</h3>
+            <button class="modal-close" id="closeApplyModal">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+                <label class="form-label">Выберите резюме</label>
+                <select class="form-select" id="applyResumeSelect">
+                    <option value="">Без резюме</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Сопроводительное письмо <span class="optional">(необязательно)</span></label>
+                <textarea class="form-textarea" id="applyCoverLetter" rows="5" placeholder="Расскажите о себе и почему вас интересует эта вакансия..."></textarea>
+                <span class="char-counter" id="coverLetterCounter">0 / 1000</span>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-ghost" id="cancelApply">Отмена</button>
+            <button class="btn btn-primary" id="submitApply">
+                <span class="btn-text">Откликнуться</span>
+                <span class="btn-loader hidden"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="spin"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg></span>
+            </button>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+const JOB_ID = {{ job_id }};
+let jobData = null;
+
+document.addEventListener('DOMContentLoaded', () => {
+    loadJob();
+});
+
+async function loadJob() {
+    try {
+        const data = await API.get(`/api/jobs/${JOB_ID}`);
+        jobData = data.job;
+        renderJob(jobData);
+    } catch(e) {
+        document.getElementById('jobPageLayout').innerHTML = `
+            <div class="error-state">
+                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                <h3>Вакансия не найдена</h3>
+                <p>Возможно, она была удалена или деактивирована</p>
+                <a href="/jobs" class="btn btn-primary">Все вакансии</a>
+            </div>`;
+    }
+}
+
+function renderJob(job) {
+    document.title = `${job.title} — Turkmen Search`;
+    document.getElementById('breadcrumbTitle').textContent = job.title;
+
+    const skillsArr = job.skills ? JSON.parse(job.skills) : [];
+    const company = job.company || {};
+
+    const layout = document.getElementById('jobPageLayout');
+    layout.innerHTML = `
+        <div class="job-main">
+            <!-- Job Header Card -->
+            <div class="job-header-card">
+                <div class="job-header-top">
+                    <div class="job-company-logo">
+                        ${company.logo
+                            ? `<img src="/uploads/logos/${company.logo}" alt="${company.name}" class="company-logo-img">`
+                            : `<div class="company-logo-placeholder">${(company.name || 'C')[0]}</div>`}
+                    </div>
+                    <div class="job-header-info">
+                        <div class="job-header-meta">
+                            ${job.is_hot ? '<span class="badge badge-hot">🔥 Горячая вакансия</span>' : ''}
+                            <span class="badge badge-${job.employment_type}">${job.employment_display}</span>
+                        </div>
+                        <h1 class="job-title-main">${job.title}</h1>
+                        <a href="/companies/${company.id}" class="job-company-link">
+                            ${company.name || ''}
+                            ${company.is_verified ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="#2563EB"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01" stroke="white" stroke-width="2" fill="none"/></svg>' : ''}
+                        </a>
+                    </div>
+                </div>
+
+                <div class="job-key-info">
+                    <div class="job-key-item">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                        <div>
+                            <span class="key-item-label">Зарплата</span>
+                            <span class="key-item-value salary-value">${job.salary}</span>
+                        </div>
+                    </div>
+                    <div class="job-key-item">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                        <div>
+                            <span class="key-item-label">Город</span>
+                            <span class="key-item-value">${job.city}${job.remote ? ' · Удалённо' : ''}</span>
+                        </div>
+                    </div>
+                    <div class="job-key-item">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+                        <div>
+                            <span class="key-item-label">Опыт</span>
+                            <span class="key-item-value">${job.experience_display}</span>
+                        </div>
+                    </div>
+                    <div class="job-key-item">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        <div>
+                            <span class="key-item-label">Опубликовано</span>
+                            <span class="key-item-value">${formatDate(job.created_at)}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="job-header-actions">
+                    ${renderApplyButton(job)}
+                    <button class="btn btn-ghost" id="saveJobBtn" onclick="toggleSaveJob(${job.id})">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+                        Сохранить
+                    </button>
+                    <button class="btn btn-ghost" onclick="shareJob()">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+                        Поделиться
+                    </button>
+                </div>
+
+                <div class="job-stats-bar">
+                    <span class="job-stat-item">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                        ${job.views_count} просмотров
+                    </span>
+                    <span class="job-stat-item">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                        ${job.applications_count} откликов
+                    </span>
+                </div>
+            </div>
+
+            <!-- Description -->
+            ${job.description ? `
+            <div class="job-section-card">
+                <h2 class="job-section-title">Описание вакансии</h2>
+                <div class="job-text-content">${formatText(job.description)}</div>
+            </div>` : ''}
+
+            <!-- Responsibilities -->
+            ${job.responsibilities ? `
+            <div class="job-section-card">
+                <h2 class="job-section-title">Обязанности</h2>
+                <div class="job-text-content">${formatText(job.responsibilities)}</div>
+            </div>` : ''}
+
+            <!-- Requirements -->
+            ${job.requirements ? `
+            <div class="job-section-card">
+                <h2 class="job-section-title">Требования</h2>
+                <div class="job-text-content">${formatText(job.requirements)}</div>
+            </div>` : ''}
+
+            <!-- Conditions -->
+            ${job.conditions ? `
+            <div class="job-section-card">
+                <h2 class="job-section-title">Условия</h2>
+                <div class="job-text-content">${formatText(job.conditions)}</div>
+            </div>` : ''}
+
+            <!-- Skills -->
+            ${skillsArr.length > 0 ? `
+            <div class="job-section-card">
+                <h2 class="job-section-title">Ключевые навыки</h2>
+                <div class="skills-list">
+                    ${skillsArr.map(s => `<span class="skill-tag">${s}</span>`).join('')}
+                </div>
+            </div>` : ''}
+
+            <!-- Related Jobs -->
+            ${job.related_jobs && job.related_jobs.length > 0 ? `
+            <div class="job-section-card">
+                <h2 class="job-section-title">Похожие вакансии</h2>
+                <div class="related-jobs-list">
+                    ${job.related_jobs.map(j => renderJobListItem(j)).join('')}
+                </div>
+            </div>` : ''}
+        </div>
+
+        <!-- SIDEBAR -->
+        <aside class="job-sidebar">
+            <!-- Company Card -->
+            <div class="sidebar-card">
+                <h3 class="sidebar-card-title">О компании</h3>
+                <div class="company-sidebar-info">
+                    <div class="company-sidebar-logo">
+                        ${company.logo
+                            ? `<img src="/uploads/logos/${company.logo}" alt="${company.name}">`
+                            : `<div class="company-logo-placeholder-sm">${(company.name || 'C')[0]}</div>`}
+                    </div>
+                    <div>
+                        <a href="/companies/${company.id}" class="company-sidebar-name">${company.name}</a>
+                        ${company.is_verified ? '<div class="verified-badge-sm">✓ Верифицирована</div>' : ''}
+                    </div>
+                </div>
+                ${company.industry ? `<div class="company-sidebar-detail"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg> ${company.industry}</div>` : ''}
+                ${company.city ? `<div class="company-sidebar-detail"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg> ${company.city}</div>` : ''}
+                ${company.employees_display ? `<div class="company-sidebar-detail"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> ${company.employees_display}</div>` : ''}
+                <a href="/companies/${company.id}" class="btn btn-ghost btn-full" style="margin-top:12px;">Все вакансии компании</a>
+            </div>
+
+            <!-- Apply Sticky -->
+            <div class="sidebar-card sidebar-apply">
+                <h3 class="sidebar-card-title">Откликнуться</h3>
+                <p class="sidebar-apply-text">Отправьте отклик прямо сейчас</p>
+                ${renderApplyButton(job)}
+            </div>
+        </aside>
+    `;
+
+    setupApplyModal();
+}
+
+function renderApplyButton(job) {
+    if (job.already_applied) {
+        return `<button class="btn btn-success btn-lg" disabled>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+            Отклик отправлен
+        </button>`;
+    }
+    if (!Auth.isLoggedIn()) {
+        return `<a href="/login?redirect=/jobs/${JOB_ID}" class="btn btn-primary btn-lg">Войдите, чтобы откликнуться</a>`;
+    }
+    const user = Auth.getUser();
+    if (user && user.role === 'employer') {
+        return `<button class="btn btn-primary btn-lg" disabled>Только для соискателей</button>`;
+    }
+    return `<button class="btn btn-primary btn-lg" id="applyBtn" onclick="openApplyModal()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        Откликнуться
+    </button>`;
+}
+
+function openApplyModal() {
+    if (!Auth.isLoggedIn()) {
+        window.location.href = `/login?redirect=/jobs/${JOB_ID}`;
+        return;
+    }
+    document.getElementById('applyModal').classList.remove('hidden');
+    loadUserResumes();
+}
+
+function setupApplyModal() {
+    document.getElementById('closeApplyModal')?.addEventListener('click', closeApplyModal);
+    document.getElementById('applyModalOverlay')?.addEventListener('click', closeApplyModal);
+    document.getElementById('cancelApply')?.addEventListener('click', closeApplyModal);
+
+    document.getElementById('applyCoverLetter')?.addEventListener('input', (e) => {
+        const len = e.target.value.length;
+        document.getElementById('coverLetterCounter').textContent = `${len} / 1000`;
+        if (len > 1000) e.target.value = e.target.value.substring(0, 1000);
+    });
+
+    document.getElementById('submitApply')?.addEventListener('click', submitApply);
+}
+
+function closeApplyModal() {
+    document.getElementById('applyModal').classList.add('hidden');
+}
+
+async function loadUserResumes() {
+    try {
+        const data = await API.get('/api/resumes/my', true);
+        const select = document.getElementById('applyResumeSelect');
+        if (data.resumes && data.resumes.length > 0) {
+            data.resumes.forEach(r => {
+                const opt = document.createElement('option');
+                opt.value = r.id;
+                opt.textContent = r.title;
+                select.appendChild(opt);
+            });
+        }
+    } catch(e) {}
+}
+
+async function submitApply() {
+    const btn = document.getElementById('submitApply');
+    btn.querySelector('.btn-text').classList.add('hidden');
+    btn.querySelector('.btn-loader').classList.remove('hidden');
+    btn.disabled = true;
+
+    try {
+        const resumeId = document.getElementById('applyResumeSelect').value;
+        const coverLetter = document.getElementById('applyCoverLetter').value.trim();
+
+        await API.post('/api/applications', {
+            job_id: JOB_ID,
+            resume_id: resumeId ? parseInt(resumeId) : null,
+            cover_letter: coverLetter,
+        }, true);
+
+        closeApplyModal();
+        showToast('Отклик отправлен успешно!', 'success');
+        jobData.already_applied = true;
+
+        document.querySelectorAll('#applyBtn').forEach(btn => {
+            btn.outerHTML = `<button class="btn btn-success btn-lg" disabled>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                Отклик отправлен
+            </button>`;
+        });
+
+    } catch(e) {
+        showToast(e.message || 'Ошибка при отправке отклика', 'error');
+        btn.querySelector('.btn-text').classList.remove('hidden');
+        btn.querySelector('.btn-loader').classList.add('hidden');
+        btn.disabled = false;
+    }
+}
+
+function toggleSaveJob(jobId) {
+    const saved = JSON.parse(localStorage.getItem('savedJobs') || '[]');
+    const idx = saved.indexOf(jobId);
+    if (idx === -1) {
+        saved.push(jobId);
+        showToast('Вакансия сохранена', 'success');
+    } else {
+        saved.splice(idx, 1);
+        showToast('Вакансия удалена из сохранённых', 'info');
+    }
+    localStorage.setItem('savedJobs', JSON.stringify(saved));
+}
+
+function shareJob() {
+    if (navigator.share) {
+        navigator.share({ title: jobData.title, url: window.location.href });
+    } else {
+        navigator.clipboard.writeText(window.location.href);
+        showToast('Ссылка скопирована', 'success');
+    }
+}
+
+function formatText(text) {
+    if (!text) return '';
+    return text.split('\n').map(line => `<p>${line}</p>`).join('');
+}
+</script>
+{% endblock %}
